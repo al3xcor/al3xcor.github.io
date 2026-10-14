@@ -74,16 +74,19 @@
   .cell.foto img{width:100%; height:100%; object-fit:cover; display:block}
   .cell.foto .fallback{display:flex; align-items:center; justify-content:center; height:100%; font-size:26px; color:var(--mut)}
   /* whatsapp */
-  .wa-wrap{background:#efe7dd; border-radius:14px; padding:10px; margin-bottom:10px}
-  .wa-head{display:flex; align-items:center; gap:8px; padding:2px 4px 10px; border-bottom:1px solid #d6ccc2; margin-bottom:10px}
-  .wa-head .av{width:30px; height:30px; border-radius:50%; background:#25d366; color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px}
-  .wa-head b{color:#111b21; font-size:14px}
-  .wa-head span{color:#667781; font-size:11px}
-  .burbuja{position:relative; background:#d9fdd3; color:#111b21; border-radius:12px; border-top-right-radius:3px; padding:10px 12px; min-height:52px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; box-shadow:0 1px 0 rgba(0,0,0,.08)}
-  .burbuja:after{content:""; position:absolute; right:-8px; top:0; width:0; height:0; border:8px solid transparent; border-top-color:#d9fdd3; border-right:0}
-  .chip.wa{background:rgba(17,27,33,.07); color:#111b21; border:0; margin:0}
+  .wa-wrap{background:#efe7dd; border-radius:14px; overflow:hidden; margin-bottom:10px; border:1px solid #d6ccc2}
+  .wa-head{display:flex; align-items:center; gap:10px; padding:10px 12px; background:#128c7e; color:#fff}
+  .wa-head .av{width:34px; height:34px; border-radius:50%; background:#25d366; color:#fff; display:flex; align-items:center; justify-content:center; font-size:17px; border:1px solid rgba(255,255,255,.35)}
+  .wa-head b{color:#fff; font-size:15px; display:block; line-height:1.15}
+  .wa-head span{color:rgba(255,255,255,.75); font-size:11px}
+  .wa-head .atras{font-size:20px; opacity:.85; margin-right:2px}
+  .wa-body{padding:12px; background-color:#efe7dd; background-image:radial-gradient(rgba(0,0,0,.045) 1.1px, transparent 1.1px); background-size:18px 18px}
+  .burbuja{position:relative; background:#d9fdd3; color:#111b21; border-radius:10px; border-top-right-radius:3px; padding:8px 10px 6px; min-height:52px; display:flex; flex-wrap:wrap; gap:5px; align-items:center; box-shadow:0 1px 1px rgba(0,0,0,.13)}
+  .burbuja:after{content:""; position:absolute; right:-7px; top:0; width:0; height:0; border:7px solid transparent; border-top-color:#d9fdd3; border-right:0}
+  .burbuja .hora{position:absolute; right:8px; bottom:3px; font-size:10px; color:#667781}
+  .chip.wa{background:rgba(17,27,33,.07); color:#111b21; border:0; margin:0; font-size:14px}
   .chip.wa.placed{background:#25d366; color:#fff}
-  .wa-meta{margin-top:8px; font-size:13px; color:#54656f}
+  .wa-meta{margin-top:8px; font-size:12.5px; color:#54656f; text-align:right}
   .wa-meta b{color:#111b21}
   .wa-meta .sub{display:block; font-style:italic}
   .opts{display:flex; gap:10px; margin-top:10px}
@@ -95,7 +98,8 @@
   .chip:disabled{opacity:.5}
   /* simon */
   .pads{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0}
-  .pad{aspect-ratio:1.3; border-radius:14px; border:2px solid var(--line); background:var(--panel2); font-size:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none}
+  .pad{aspect-ratio:1.3; border-radius:14px; border:2px solid var(--line); background:var(--panel2); display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; overflow:hidden; padding:0}
+  .pad img{width:100%; height:100%; object-fit:cover; display:block; pointer-events:none}
   .pad.lit{filter:brightness(2.2)}
   .pad.good{border-color:var(--good)}
   .pad.apagado{opacity:.07}
@@ -185,6 +189,13 @@
   <footer class="foot">Portal de invitados v2.2 · <button id="reset" type="button">empezar de cero</button></footer>
 </div>
 <button class="notas-btn" id="notasBtn" type="button">📝 <span id="notasN">0</span>/16</button>
+<button class="notas-btn" id="admSaltar" type="button" style="display:none; right:96px">⏭ saltar fase</button>
+<div class="notas-panel oculto" id="confirmReset">
+  <h2 style="margin-bottom:6px">¿Empezar de cero?</h2>
+  <p class="mut small" style="margin-bottom:10px">Perderás todo el progreso y los sellos. Es un sí/no, no un despiste.</p>
+  <button class="btn pri" id="confSi" type="button">Sí, borrar</button>
+  <button class="btn ghost" id="confNo" type="button">No, seguir jugando</button>
+</div>
 <div class="notas-panel oculto" id="notasPanel">
   <h2 style="margin-bottom:6px">Tus sellos</h2>
   <p class="mut small" style="margin-bottom:8px">Cada fase superada te da un sello con un dígito. En la fase 13 te van a hacer falta <b>todos</b>.</p>
@@ -388,7 +399,13 @@ var MAZE2 = [
   [0,1,1,1,1],
   [0,0,0,0,0]
 ];
-var PADS_EMO = ["\u{1F943}","\u{1F959}","\u{1F48A}","\u{1F92E}"]; // garrafon, kebab, paracetamol, arcada
+var PADS_EMO = ["\u{1F943}","\u{1F959}","\u{1F48A}","\u{1F92E}"]; // (referencia historica)
+var PADS_URLS = [
+  "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/German_cockroach_%28Blattella_germanica%29_probably_%2843118262090%29.jpg/330px-German_cockroach_%28Blattella_germanica%29_probably_%2843118262090%29.jpg",
+  "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Food_waste_with_moldy_bread.jpg/330px-Food_waste_with_moldy_bread.jpg",
+  "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/Moldy_tomatoes.jpg/330px-Moldy_tomatoes.jpg",
+  "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ac/Rotten_Apple_02.jpg/330px-Rotten_Apple_02.jpg"
+];
 var PADS_COL = ["#1f5aa8","#a8441f","#1f8a4d","#8a1f8a"];
 
 var app = document.getElementById("app");
@@ -401,7 +418,7 @@ var toastTimer = null;
 function nuevoEstado(){
   var digits = [];
   for (var i=0;i<16;i++) digits.push(String(rnd(10)));
-  return { nombre:"", i:0, digits:digits, done:0, examenAyuda:false };
+  return { nombre:"", i:0, digits:digits, done:0, examenAyuda:false, admin:false, finalAbierto:false };
 }
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
@@ -485,10 +502,13 @@ function simonRun(o){
 
   var padEls = [];
   var pads = $("pads");
-  PADS_EMO.forEach(function(e, i){
+  PADS_URLS.forEach(function(u, i){
     var p = document.createElement("div");
-    p.className = "pad"; p.textContent = e; p.setAttribute("role","button"); p.tabIndex = 0;
+    p.className = "pad"; p.setAttribute("role","button"); p.tabIndex = 0;
     p.dataset.i = i;
+    var img = document.createElement("img");
+    img.src = u; img.alt = "pad " + (i + 1); img.decoding = "async";
+    p.appendChild(img);
     pads.appendChild(p); padEls.push(p);
   });
 
@@ -612,32 +632,17 @@ screens.intro = function(){
   function start(){
     var v = inp.value.trim().slice(0,24);
     G.nombre = v || "Invitado ilustre";
-    if (v.toLowerCase().replace(/\s+/g,"") === "admin"){ toast("El portal te reconoce, jefe. 🕵️", 3000); }
+    if (v.toLowerCase().replace(/\s+/g,"") === "admin"){
+      G.admin = true;
+      toast("Modo administrador: botón ⏭ arriba a la derecha para saltar fases.", 4500);
+      refrescaAdmin();
+    }
     go("n1");
   }
   $("go").onclick = start;
   $("notasAtajo").onclick = function(){ $("notasPanel").classList.remove("oculto"); refrescaNotas(); };
   inp.addEventListener("keydown", function(e){ if (e.key === "Enter") start(); });
 };
-
-/* ================= easter egg: panel de administrador ================= */
-(function panelAdmin(){
-  var toques = 0, timer = null;
-  var brand = document.querySelector(".brand");
-  if (!brand) return;
-  brand.style.cursor = "pointer";
-  brand.addEventListener("click", function(){
-    toques++;
-    clearTimeout(timer);
-    timer = setTimeout(function(){ toques = 0; }, 1200);
-    if (toques === 3) toast("…");
-    if (toques >= 7){
-      toques = 0;
-      $("adminPanel").classList.toggle("oculto");
-      if (!$("adminPanel").classList.contains("oculto")) toast("Modo administrador activado", 2500);
-    }
-  });
-})();
 
 /* ================= N1: identificacion ================= */
 screens.n1 = function(){
@@ -677,6 +682,32 @@ screens.n1 = function(){
 };
 
 /* ================= N2: rondas de fotos ================= */
+function personaDe(u){
+  if (u.indexOf("/fotos/") >= 0) return u.split("/fotos/")[1].replace(/\/.*/, "").replace(/\d+\.jpg$/, "");
+  if (/Broncano/.test(u)) return "broncano";
+  if (/Ibai/.test(u)) return "ibai";
+  if (/Risto/.test(u)) return "risto";
+  if (/Pedrerol/.test(u)) return "pedrerol";
+  if (/Motos/.test(u)) return "motos";
+  if (/Ana_Rosa/.test(u)) return "anarosa";
+  if (/Vinicius|Vin%C3%ADcius/.test(u)) return "vinicius";
+  return "x";
+}
+// reparte las casillas evitando dos de la misma persona juntas en la misma fila (4 columnas)
+function repartir(celdas){
+  var mejor = null, mejorChoques = 99;
+  for (var intento = 0; intento < 300; intento++){
+    var arr = pick(celdas, celdas.length);
+    var choques = 0;
+    for (var i = 0; i < arr.length; i++){
+      if (i % 4 !== 3 && personaDe(arr[i].u) === personaDe(arr[i + 1].u)) choques++;
+    }
+    if (choques === 0) return arr;
+    if (choques < mejorChoques){ mejor = arr; mejorChoques = choques; }
+  }
+  return mejor || pick(celdas, celdas.length);
+}
+
 screens.n2 = function(){
   setProg(faseTxt(2));
   G.i = 1;
@@ -695,7 +726,7 @@ screens.n2 = function(){
   function mostrar(){
     rondaOk = false;
     var ronda = FOTOS[r];
-    var celdas = pick(ronda.celdas, ronda.celdas.length);
+    var celdas = repartir(ronda.celdas);
     var sel = {};
     $("f2body").innerHTML =
       '<h2>Fase 2 · Ronda ' + (r+1) + '/' + FOTOS.length + ' · Selección visual</h2>' +
@@ -753,7 +784,7 @@ screens.n3 = function(){
   app.innerHTML =
     '<div class="card anim-in" id="f3">' +
       '<h2>Fase 3 · Cuestionario de admisión</h2>' +
-      '<p class="mut small">Tres preguntas. Si fallas, insistes. Sin salida por la puerta de atrás.</p>' +
+      '<p class="mut small">Tres preguntas. Si fallas, insistes.</p>' +
       '<div id="f3body"></div>' +
     '</div>';
   function mostrar(){
@@ -829,7 +860,7 @@ screens.n4 = function(){
   app.innerHTML =
     '<div class="card anim-in" id="of">' +
       '<h2>Fase 4 · El grupo de Casco de Papa</h2>' +
-      '<p class="mut small">Reconstruye el mensaje pulsando las palabras en orden. Si aciertas, sabrás quién lo escribió.</p>' +
+      '<p class="mut small">Ordena el mensaje. Pulsa una palabra colocada para bajarla.</p>' +
       '<div id="ofbody"></div>' +
     '</div>';
   function mostrar(){
@@ -842,9 +873,11 @@ screens.n4 = function(){
     var bloqueado = false;
     $("ofbody").innerHTML =
       '<div class="wa-wrap">' +
-        '<div class="wa-head"><div class="av">👥</div><div><b>Casco de Papa</b><br><span>en línea</span></div></div>' +
-        '<div class="burbuja" id="const"></div>' +
-        '<div class="wa-meta oculto" id="wameta"></div>' +
+        '<div class="wa-head"><span class="atras">‹</span><div class="av">👥</div><div><b>Casco de Papa</b><span>en línea</span></div></div>' +
+        '<div class="wa-body">' +
+          '<div class="burbuja" id="const"></div>' +
+          '<div class="wa-meta oculto" id="wameta"></div>' +
+        '</div>' +
       '</div>' +
       '<div id="chips"></div>';
     var mezcla = pick(palabras.map(function(p, i){ return {p:p, i:i}; }), total);
@@ -888,7 +921,7 @@ screens.n4 = function(){
         fallosFrase = 0;
         var meta = $("wameta");
         meta.classList.remove("oculto");
-        meta.innerHTML = '— <b>' + esc(frase.autor) + '</b> ✅✅' +
+        meta.innerHTML = '— <b>' + esc(frase.autor) + '</b> <span style="color:#34b7f1">✓✓</span>' +
           (frase.sub ? '<span class="sub">' + esc(frase.sub) + '</span>' : "");
         setTimeout(function(){
           idx++;
@@ -914,8 +947,8 @@ screens.n5 = function(){
   G.i = 4;
   simonRun({
     rondas: 4, base: 3,
-    titulo: "Fase 5 · Test de Reflejos de Resaca",
-    sub: "🥃 Garrafón · 🥙 Kebab de dudosa procedencia · 💊 Paracetamol · 🤮 Arcada. Repite la secuencia. Como el wifi de la finca: si falla, se corta y vuelta a empezar.",
+    titulo: "Fase 5 · Simón dice: edición asco",
+    sub: "Repite la secuencia. Cucaracha · pan con moho · tomate mohoso · manzana podrida.",
     onWin: siguiente,
     onFail: function(){ rendicion("Reflejos de pensionista un domingo por la mañana. Con ese pulso no te dejan ni sujetar un vaso de plástico."); }
   });
@@ -929,7 +962,7 @@ screens.n6 = function(){
   app.innerHTML =
     '<div class="card anim-in" id="hu">' +
       '<h2>Fase 6 · Cobrar el Bizum a Luis</h2>' +
-      '<p class="mut small">Reclámale los 3,50 € de la cena. El botón esquiva con las excusas de siempre.</p>' +
+      '<p class="mut small">Reclámale los 3,50 € de la cena.</p>' +
       '<div class="huir" id="huir">' +
         '<button class="btn pri" id="huye" type="button">Reclamar 3,50 € de la cena</button>' +
       '</div>' +
@@ -987,7 +1020,7 @@ screens.n7 = function(){
   app.innerHTML =
     '<div class="card anim-in" id="tb">' +
       '<h2>Fase 7 · Mandar un mensaje coherente a las 05:42</h2>' +
-      '<p class="mut small">Escribe el mensaje de madrugada: <b id="objetivo" class="mono">' + esc(frase) + '</b>. Ojo: el teclado se recoloca cada 3 letras, como tus dedos a esas horas.</p>' +
+      '<p class="mut small">Escríbelo: <b id="objetivo" class="mono">' + esc(frase) + '</b></p>' +
       '<div class="escrito" id="escrito"></div>' +
       '<div class="teclado" id="teclado"></div>' +
       '<button class="btn pri oculto" id="trucoBtn" type="button" style="margin-top:12px">⏭ Saltar fase (tú sabes por qué)</button>' +
@@ -1014,7 +1047,7 @@ screens.n7 = function(){
     if (frase.charAt(escrito.length) === k){
       escrito += k; correctas++;
       $("tbmsg").textContent = "";
-      if (correctas % 3 === 0 && escrito.length < frase.length){
+      if (correctas % 2 === 0 && escrito.length < frase.length){
         orden = pick(orden, orden.length);
         toast("¡Las teclas se mueven!", 1200);
       }
@@ -1053,7 +1086,7 @@ screens.n8 = function(){
   app.innerHTML =
     '<div class="card anim-in" id="ml" data-score="0" data-errores="0">' +
       '<h2>Fase 8 · Detector de chóped</h2>' +
-      '<p class="mut small">Toca solo cuando veas melena natural abundante (\u{1F468}\u{1F9B1}). Si sale entrada disimulada (\u{1F9E2}), abuelo power (\u{1F474}) o vuelo a Estambul (✈️), NO toques: miente. Diez aciertos y pasas.</p>' +
+      '<p class="mut small">Toca solo cuando veas melena natural abundante. Si sale entrada disimulada, abuelo power o vuelo a Estambul, NO toques.</p>' +
       '<div class="holes" id="holes"></div>' +
       '<p class="small" id="mlmsg" style="text-align:center;min-height:20px"></p>' +
     '</div>';
@@ -1120,7 +1153,7 @@ screens.n9 = function(){
   app.innerHTML =
     '<div class="card anim-in" id="tc9" data-n="0">' +
       '<h2>Fase 9 · Echar el chorro de alcohol a ojo</h2>' +
-      '<p class="mut small">Pulsa el botón grande <b>exactamente 10 veces</b> y dale a LISTO. Sin contar, como en la barra.</p>' +
+      '<p class="mut small">Pulsa el botón 10 veces exactas. Luego LISTO.</p>' +
       '<button class="btn pri tapgrande" id="tap10" type="button">SIRVE</button>' +
       '<button class="btn" id="listo9" type="button">LISTO</button>' +
       '<p class="mut small" id="tc9msg" style="text-align:center;min-height:20px;margin-top:10px"></p>' +
@@ -1154,13 +1187,13 @@ screens.n9 = function(){
 screens.n10 = function(){
   setProg(faseTxt(10));
   G.i = 9;
-  var ventanas = [700, 550, 450];
+  var ventanas = [550, 420, 330, 260];
   var ronda = 0, intentos = 0, estado = "espera", t0 = 0, timer = null;
 
   app.innerHTML =
     '<div class="card anim-in" id="rx">' +
       '<h2>Fase 10 · Salvar el cubata en la mesa coja</h2>' +
-      '<p class="mut small">Toca la pantalla <b>justo cuando el cubata se tambalee</b>, antes de que manche a todo el mundo. Ni antes ni muy después. Tres rondas, cada una más rápida.</p>' +
+      '<p class="mut small">Toca justo cuando se tambalee.</p>' +
       '<div class="rbox" id="rbox" data-estado="espera" role="button" tabindex="0">ESPERA…</div>' +
       '<p class="mut small" id="rxmsg" style="text-align:center;min-height:20px;margin-top:10px"></p>' +
     '</div>';
@@ -1170,7 +1203,7 @@ screens.n10 = function(){
     var box = $("rbox");
     box.dataset.estado = "espera";
     box.textContent = "ESPERA…";
-    $("rxmsg").textContent = "Ronda " + (ronda + 1) + "/3 · ventana de " + ventanas[ronda] + " ms";
+    $("rxmsg").textContent = "Ronda " + (ronda + 1) + "/" + ventanas.length + " · ventana de " + ventanas[ronda] + " ms";
     timer = setTimeout(function(){
       if (estado !== "espera") return;
       estado = "verde"; t0 = Date.now();
@@ -1217,7 +1250,7 @@ screens.n11 = function(){
   simonRun({
     rondas: 2, base: 4, inverso: true,
     titulo: "Fase 11 · Memoria inversa",
-    sub: "La secuencia se repite AL REVÉS. Dos rondas. Sí, es cruel.",
+    sub: "La secuencia se repite al revés.",
     onWin: siguiente,
     onFail: function(){ rendicion("Al revés solo sabes leer el mapa del móvil."); }
   });
@@ -1247,7 +1280,7 @@ screens.n12 = function(){
   app.innerHTML =
     '<div class="card anim-in" id="sm">' +
       '<h2>Fase 12 · Sumas en español</h2>' +
-      '<p class="mut small">Con letras, no con números. Cuatro preguntas. Sin calculadora.</p>' +
+      '<p class="mut small">Con letras, no con números.</p>' +
       '<div id="smbody"></div>' +
     '</div>';
   function mostrar(){
@@ -1293,7 +1326,7 @@ screens.n13 = function(){
   app.innerHTML =
     '<div class="card anim-in" id="cd">' +
       '<h2>Fase 13 · El código acumulado</h2>' +
-      '<p class="mut small">Cada sello que has ganado lleva un dígito. Aquí tienes que escribirlos <b>todos, en orden</b>. Si no los apuntaste, los tienes en el botón 📝 de abajo a la derecha.</p>' +
+      '<p class="mut small">Tus dígitos, en orden. Están en 📝 abajo a la derecha.</p>' +
       '<div class="construida mono" id="cdmstr" style="justify-content:center;font-size:22px;letter-spacing:.2em;min-height:60px"></div>' +
       '<div class="numk" id="numk"></div>' +
       '<p class="mut small" id="cdmsg" style="text-align:center;min-height:20px;margin-top:10px"></p>' +
@@ -1349,7 +1382,7 @@ screens.n14 = function(){
   app.innerHTML =
     '<div class="card anim-in" id="mm" data-codsol="' + codigo.join(",") + '">' +
       '<h2>Fase 14 · La caja de los emojis</h2>' +
-      '<p class="mut small">Adivina la combinación de 3 emojis en 6 intentos. Tras cada intento te digo cuántos están en su sitio (✓) y cuántos están pero cambiados (~).</p>' +
+      '<p class="mut small">Adivina la combinación de 3 en 6 intentos.</p>' +
       '<div class="slots" id="slots"></div>' +
       '<div class="grid" style="grid-template-columns:repeat(3,1fr)" id="mmkeys"></div>' +
       '<div id="mmfb"></div>' +
@@ -1415,7 +1448,7 @@ screens.n15 = function(){
   simonRun({
     rondas: 1, base: 7, ciego: true,
     titulo: "Fase 15 · Simón ciego",
-    sub: "Siete emojis, se muestran UNA vez y se apagan. Repítelos a ciegas.",
+    sub: "Se muestran una vez y se apagan.",
     onWin: siguiente,
     onFail: function(){ rendicion("A ciegas solo encuentras el mando de la tele."); }
   });
@@ -1429,7 +1462,7 @@ screens.n16 = function(){
   app.innerHTML =
     '<div class="card anim-in" id="mz">' +
       '<h2>Fase 16 · La retirada a tientas</h2>' +
-      '<p class="mut small">Guía al muñeco tambaleante (\u{1F6B6}) hasta su casa (\u{1F3E1}) esquivando controles \u{1F693}, esquinas traicioneras y bancos de iglesia \u26EA. Usa las flechas. 60 movimientos y te apiadan.</p>' +
+      '<p class="mut small">Llega a tu casa esquivando controles y bancos de iglesia.</p>' +
       '<div class="maze" id="maze"></div>' +
       '<div class="dpad" id="dpad">' +
         '<span></span><button data-dir="up" type="button">↑</button><span></span>' +
@@ -1486,12 +1519,21 @@ screens.n16 = function(){
   pintar();
 };
 
-/* ================= easter eggs de administrador ================= */
-$("admSkip").onclick = function(){
-  $("adminPanel").classList.add("oculto");
+// Modo administrador (entrando como "admin" o con 7 toques en el 5G)
+function refrescaAdmin(){
+  var b = $("admSaltar");
+  if (b) b.style.display = G.admin ? "block" : "none";
+  var p = $("adminPanel");
+  if (p) p.classList.toggle("oculto", !G.admin);
+}
+function saltarFase(){
+  if (!G.admin) return;
   toast("Fase saltada (con sello de la lástima).");
+  $("adminPanel").classList.add("oculto");
   siguiente();
-};
+}
+$("admSaltar").onclick = saltarFase;
+$("admSkip").onclick = saltarFase;
 $("admCodigo").onclick = function(){
   $("adminPanel").classList.add("oculto");
   toast("Código: " + G.digits.slice(0, G.done).join(""), 8000);
@@ -1502,6 +1544,29 @@ $("admExamen").onclick = function(){
   toast(G.examenAyuda ? "Modo examen ON: ahora aciertas siempre." : "Modo examen OFF.", 3000);
 };
 $("admCerrar").onclick = function(){ $("adminPanel").classList.add("oculto"); };
+var toques = 0, timerToques = null;
+(function panelAdmin(){
+  var brand = document.querySelector(".brand");
+  if (!brand) return;
+  brand.style.cursor = "pointer";
+  brand.addEventListener("click", function(){
+    if (!G.admin){
+      toques++;
+      clearTimeout(timerToques);
+      timerToques = setTimeout(function(){ toques = 0; }, 1200);
+      if (toques === 3) toast("…");
+      if (toques >= 7){
+        toques = 0;
+        G.admin = true;
+        refrescaAdmin();
+        toast("Modo administrador activado", 2500);
+      }
+    } else {
+      var p = $("adminPanel");
+      p.classList.toggle("oculto");
+    }
+  });
+})();
 
 console.log("%c🍺 Cañada de la gitana · Portal de invitados", "font-weight:bold");
 console.log("%cPista 1: en el nombre pon 'admin'.", "color:#888");
@@ -1527,7 +1592,7 @@ screens.boss = function(){
   function cardTitulo(){
     $("bs").innerHTML =
       '<h2>' + (rondas === 0 ? "Fase 17 · Examen sorpresa" : "Recuperación " + rondas + "/2") + '</h2>' +
-      '<p class="mut small">10 preguntas al azar del banco. Mínimo un <b>7</b> para aprobar. Sin chuletas… salvo que seas el organizador.</p>' +
+      '<p class="mut small">10 preguntas. Mínimo un 7.</p>' +
       '<div id="bbody"></div>';
   }
   function mostrar(){
@@ -1606,7 +1671,7 @@ screens.diploma = function(){
       '<button class="btn ghost" id="repetir" type="button">Pasarle la broma a otro amigo</button>' +
     '</div>';
   $("desc").onclick = function(){ if (G.finalAbierto) return; G.finalAbierto = true; go("final"); };
-  $("repetir").onclick = function(){ resetJuego(); };
+  $("repetir").onclick = function(){ pedirReset(); };
 
   // easter egg: mantener pulsado el sello
   var sello = $("selloDip"), tLP = null;
@@ -1651,7 +1716,7 @@ screens.final = function(){
     document.body.appendChild(ov);
     function bindReset(){
       var b = $("ovreset");
-      if (b) b.onclick = function(){ ov.remove(); resetJuego(); };
+      if (b) b.onclick = function(){ pedirReset(); };
     }
     function abrir(){
       ov.innerHTML =
@@ -1665,16 +1730,23 @@ screens.final = function(){
     var yt = $("yt");
     yt.onclick = abrir;
     yt.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); abrir(); } });
-    bindReset();
-  }, 2100);
+    bindReset();  }, 2100);
 };
 
 /* ================= arranque ================= */
+function pedirReset(){
+  $("confirmReset").classList.remove("oculto");
+}
 function resetJuego(){
+  $("confirmReset").classList.add("oculto");
+  Array.prototype.forEach.call(document.querySelectorAll(".overlay"), function(o){ o.remove(); });
   G = nuevoEstado();
   refrescaNotas();
+  refrescaAdmin();
   go("cebo");
 }
+$("confSi").onclick = resetJuego;
+$("confNo").onclick = function(){ $("confirmReset").classList.add("oculto"); };
 
 function render(screen){
   try { screens[screen](); }
@@ -1686,7 +1758,7 @@ function render(screen){
   }
 }
 
-document.getElementById("reset").onclick = function(){ resetJuego(); };
+document.getElementById("reset").onclick = function(){ pedirReset(); };
 refrescaNotas();
 go("cebo");
 
