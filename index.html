@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0e1116">
 <meta name="color-scheme" content="dark">
-<title>Finca Los Almendros · WiFi</title>
+<title>Cañada de la gitana · WiFi</title>
 <style>
   :root{
     --bg:#0e1116; --panel:#161b22; --panel2:#1c232d; --line:#2a323d;
@@ -161,7 +161,7 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><span class="sig"></span> Finca Los Almendros <b>· 5G</b></div>
+    <div class="brand"><span class="sig"></span> Cañada de la gitana <b>· 5G</b></div>
     <div class="prog" id="prog"></div>
   </header>
   <main id="app" aria-live="polite"></main>
@@ -191,8 +191,8 @@
    ====== EDITA AQUÍ: cambia estos textos y la broma sigue funcionando ======
    ====================================================================== */
 var CFG = {
-  finca: "Finca Los Almendros",
-  red:   "Finca_Almendros_5G",
+  finca: "Cañada de la gitana",
+  red:   "CanadaDeLaGitana_5G",
   cumpleaneros: "Luis y Jaime",
   frasesTecleo: ["sincobertura", "felizcumple", "barralibre"],
   palabraTruco: "truco",
@@ -1300,7 +1300,7 @@ $("admExamen").onclick = function(){
 };
 $("admCerrar").onclick = function(){ $("adminPanel").classList.add("oculto"); };
 
-console.log("%c🍺 Finca Los Almendros · Portal de invitados", "font-weight:bold");
+console.log("%c🍺 Cañada de la gitana · Portal de invitados", "font-weight:bold");
 console.log("%cPista 1: en el nombre pon 'admin'.", "color:#888");
 console.log("%cPista 2: toca 7 veces el '5G' de la cabecera.", "color:#888");
 console.log("%cPista 3: en el nivel del teclado escribe 'truco'.", "color:#888");
@@ -1392,7 +1392,7 @@ screens.diploma = function(){
     '<div class="card anim-in">' +
       '<div class="dip">' +
         '<div class="ttl">Acreditativo de acceso a la red</div>' +
-        '<div class="mut small">Finca Los Almendros · ' + esc(CFG.red) + '</div>' +
+        '<div class="mut small">' + esc(CFG.finca) + ' · ' + esc(CFG.red) + '</div>' +
         '<div class="who">' + esc(G.nombre) + '</div>' +
         '<p class="mut small">Ha superado las ' + TOTAL_FASES + ' fases del portal de invitados con <b>' + G.done + '/16 sellos</b> ' + (G.done < 16 ? "(alguno de lástima, pero sellos)" : "") + ' y queda autorizado a:</p>' +
         '<p style="margin:6px 0"><b>Contraseña de la red:</b><br><span class="pwd">' + p1 + '-' + p2 + '</span></p>' +
