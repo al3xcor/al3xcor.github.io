@@ -316,7 +316,8 @@ var PREGUNTAS = {
   ]
 };
 
-/* ---- Fotos de la fase 2 (rondas visuales). ok:1 = hay que marcarla ---- */
+/* ---- Fotos de la fase 2 (rondas visuales). ok:1 = hay que marcarla.
+   Ninguna foto se repite entre rondas. ---- */
 var FOTOS = [
   { consigna:"Selecciona todas las casillas donde aparezca David Broncano.",
     celdas:[
@@ -342,14 +343,30 @@ var FOTOS = [
       {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Vinicius_Jr_2021.jpg/330px-Vinicius_Jr_2021.jpg", ok:0},
       {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Vin%C3%ADcius_J%C3%BAnior_Brazil_V_Morocco_13_June_2026-207_%28cropped%29.jpg/330px-Vin%C3%ADcius_J%C3%BAnior_Brazil_V_Morocco_13_June_2026-207_%28cropped%29.jpg", ok:0}
     ]},
-  { consigna:"Selecciona todas las casillas donde aparezca Alvise Pérez.",
+  { consigna:"Selecciona todas las casillas donde aparezca una Marina Rivera. Sí, hay más de una.",
     celdas:[
-      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Alvise_P%C3%A9rez_en_los_Premios_HO_2021.jpg/330px-Alvise_P%C3%A9rez_en_los_Premios_HO_2021.jpg", ok:1},
-      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/1720511531544_20240709_PEREZ_FERNANDEZ_Luis_ES_004.jpg/330px-1720511531544_20240709_PEREZ_FERNANDEZ_Luis_ES_004.jpg", ok:1},
-      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Malaga_Film_Festival_2025_-_Marina_Rivera_%28cropped%29.jpg/330px-Malaga_Film_Festival_2025_-_Marina_Rivera_%28cropped%29.jpg", ok:0},
-      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/Premios_Goya_2026_-_Marina_Rivera.jpg/330px-Premios_Goya_2026_-_Marina_Rivera.jpg", ok:0},
-      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Vinicius_Jr_2018_%28cropped%29.jpg/330px-Vinicius_Jr_2018_%28cropped%29.jpg", ok:0},
-      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Ousmane_Demb%C3%A9l%C3%A9_World_Cup_Trophy.jpg/330px-Ousmane_Demb%C3%A9l%C3%A9_World_Cup_Trophy.jpg", ok:0}
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Malaga_Film_Festival_2025_-_Marina_Rivera.jpg/330px-Malaga_Film_Festival_2025_-_Marina_Rivera.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Malaga_Film_Festival_2025_-_Marina_Rivera_02.jpg/330px-Malaga_Film_Festival_2025_-_Marina_Rivera_02.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Malaga_Film_Festival_2025_-_Marina_Rivera_03.jpg/330px-Malaga_Film_Festival_2025_-_Marina_Rivera_03.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Malaga_Film_Festival_2025_-_Marina_Rivera_02_%28cropped%29.jpg/330px-Malaga_Film_Festival_2025_-_Marina_Rivera_02_%28cropped%29.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Malaga_Film_Festival_2025_-_Marina_Rivera_%28cropped%29.jpg/330px-Malaga_Film_Festival_2025_-_Marina_Rivera_%28cropped%29.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Alvise_P%C3%A9rez_en_los_Premios_HO_2021.jpg/330px-Alvise_P%C3%A9rez_en_los_Premios_HO_2021.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/1720511531544_20240709_PEREZ_FERNANDEZ_Luis_ES_004.jpg/330px-1720511531544_20240709_PEREZ_FERNANDEZ_Luis_ES_004.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Risto_Mejide_-_001.jpg/330px-Risto_Mejide_-_001.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Risto_Mejide_-_002.jpg/330px-Risto_Mejide_-_002.jpg", ok:0}
+    ]},
+  { consigna:"Selecciona todas las casillas donde aparezca Ibai Llanos.",
+    celdas:[
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Ibai-Llanos.jpg/330px-Ibai-Llanos.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Ibai_Llanos_in_2020.jpg/330px-Ibai_Llanos_in_2020.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Ibai_Llanos_%282024%292.jpg/330px-Ibai_Llanos_%282024%292.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/Ibai_Llanos_%282024%291.jpg/330px-Ibai_Llanos_%282024%291.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ac/Ristomejide%2C_en_iRedes.jpg/330px-Ristomejide%2C_en_iRedes.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Ristomejide%2C_en_iRedes_%282%29.jpg/330px-Ristomejide%2C_en_iRedes_%282%29.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Josep_Pedrerol.jpg/330px-Josep_Pedrerol.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/%C3%93scar_del_Santo_y_Josep_Pedrerol_en_Punto_Pelota.jpg/330px-%C3%93scar_del_Santo_y_Josep_Pedrerol_en_Punto_Pelota.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Pablo_Motos-may_2018.jpg/330px-Pablo_Motos-may_2018.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/83/Ana_Rosa_Quintana_Artur_Mas.jpg/330px-Ana_Rosa_Quintana_Artur_Mas.jpg", ok:0}
     ]}
 ];
 /* ======================================================================
@@ -720,7 +737,7 @@ screens.n2 = function(){
       fallos++;
       var card = $("cap");
       card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
-      var msgs = ["Esa no es. Ni de broma.","Estás seleccionando como Jaime elige restaurante.","¿Ves la diferencia o te lo dibujo?","Luis tampoco distingue y hoy es su cumple."];
+      var msgs = ["Esa no es. Ni de broma.","Estás seleccionando como Jaime elige restaurante.","¿Ves la diferencia o te lo dibujo?","Esa Marina Rivera no es la Rivers. Como el wifi de esta finca: parece, pero no es."];
       if (fallos === 2) toast("Pista: hay " + celdas.filter(function(c){ return c.ok; }).length + " correctas, y ninguna más.", 3200);
       else if (fallos >= 3){ toast("El portal se apiada. Pasas a la siguiente ronda.", 2600); r++; avanzar(); }
       else toast(msgs[rnd(msgs.length)], 2600);
@@ -811,7 +828,7 @@ screens.n4 = function(){
   var idx = 0;
   app.innerHTML =
     '<div class="card anim-in" id="of">' +
-      '<h2>Fase 4 · El grupo de Los Mejores</h2>' +
+      '<h2>Fase 4 · El grupo de Casco de Papa</h2>' +
       '<p class="mut small">Reconstruye el mensaje pulsando las palabras en orden. Si aciertas, sabrás quién lo escribió.</p>' +
       '<div id="ofbody"></div>' +
     '</div>';
@@ -820,9 +837,10 @@ screens.n4 = function(){
     var palabras = frase.texto.split(" ");
     var total = palabras.length;
     var puestas = [];
+    var bloqueado = false;
     $("ofbody").innerHTML =
       '<div class="wa-wrap">' +
-        '<div class="wa-head"><div class="av">👥</div><div><b>Los Mejores</b><br><span>en línea</span></div></div>' +
+        '<div class="wa-head"><div class="av">👥</div><div><b>Casco de Papa</b><br><span>en línea</span></div></div>' +
         '<div class="burbuja" id="const"></div>' +
         '<div class="wa-meta oculto" id="wameta"></div>' +
       '</div>' +
@@ -837,7 +855,14 @@ screens.n4 = function(){
         c.disabled = true;
         puestas.push(w.i);
         var s = document.createElement("span");
-        s.className = "chip placed wa"; s.textContent = w.p;
+        s.className = "chip placed wa"; s.textContent = w.p; s.title = "Pulsa para bajarla";
+        s.onclick = function(){
+          if (bloqueado) return;
+          s.remove();
+          c.disabled = false; c.className = "chip";
+          var idx = puestas.indexOf(w.i);
+          if (idx >= 0) puestas.splice(idx, 1);
+        };
         $("const").appendChild(s);
         if (puestas.length === total) comprobar();
       };
@@ -846,6 +871,7 @@ screens.n4 = function(){
     function comprobar(){
       var ok = puestas.every(function(v, k){ return v === k; });
       if (ok){
+        bloqueado = true;
         var meta = $("wameta");
         meta.classList.remove("oculto");
         meta.innerHTML = '— <b>' + esc(frase.autor) + '</b> ✅✅' +
@@ -884,7 +910,7 @@ screens.n6 = function(){
   var intentos = 0, rindio = false, ya = false;
   app.innerHTML =
     '<div class="card anim-in" id="hu">' +
-      '<h2>Fase 6 · Cobrar el Bizum al rata del grupo</h2>' +
+      '<h2>Fase 6 · Cobrar el Bizum a Luis</h2>' +
       '<p class="mut small">Reclámale los 3,50 € de la cena. El botón esquiva con las excusas de siempre.</p>' +
       '<div class="huir" id="huir">' +
         '<button class="btn pri" id="huye" type="button">Reclamar 3,50 € de la cena</button>' +
@@ -895,6 +921,7 @@ screens.n6 = function(){
   var excusas = [
     "No me va la app del banco",
     "Mañana te lo hago sin falta",
+    "Me pillas muy mal",
     "¿Pero eso no iba a fondo común?",
     "Me he quedado sin cobertura",
     "Te pago la siguiente ronda y quedamos en paz"
@@ -1007,7 +1034,7 @@ screens.n8 = function(){
 
   app.innerHTML =
     '<div class="card anim-in" id="ml" data-score="0" data-errores="0">' +
-      '<h2>Fase 8 · Detector de Alopecia y Falsas Melenas</h2>' +
+      '<h2>Fase 8 · Detector de chóped</h2>' +
       '<p class="mut small">Toca solo cuando veas melena natural abundante (\u{1F468}\u{1F9B1}). Si sale entrada disimulada (\u{1F9E2}), abuelo power (\u{1F474}) o vuelo a Estambul (✈️), NO toques: miente. Diez aciertos y pasas.</p>' +
       '<div class="holes" id="holes"></div>' +
       '<p class="small" id="mlmsg" style="text-align:center;min-height:20px"></p>' +
