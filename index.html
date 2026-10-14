@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <script  type="text/javascript" src="https://codesandbox.io/public/sse-hooks/sse-hooks.e15ace8ccace5398a721ffec81f121de.js"></script>
+    <script  type="text/javascript" src="https://codesandbox.io/static/js/banner.d9cb10a38.js"></script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1116">
+<title>Finca Los Almendros · WiFi</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c232d; --line:#2a323d;
+    --tx:#e6edf3; --mut:#8b98a5; --acc:#ffb020; --bad:#ff5c5c; --good:#3fb950; --rick:#e62117;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--tx); min-height:100vh;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:16px; line-height:1.45; padding:14px;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .wrap{width:100%; max-width:520px}
+  .top{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 2px 12px}
+  .brand{font-size:13px; color:var(--mut); display:flex; align-items:center; gap:8px; letter-spacing:.02em}
+  .sig{width:10px;height:10px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good)}
+  .top b{color:var(--acc)}
+  .prog{font-size:12px;color:var(--mut);white-space:nowrap}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:20px 18px; margin-bottom:14px;
+  }
+  h1{font-size:22px; margin:0 0 8px}
+  h2{font-size:19px; margin:0 0 6px}
+  p{margin:0 0 12px}
+  .mut{color:var(--mut)}
+  .small{font-size:13px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .btn{
+    display:block; width:100%; min-height:52px; padding:12px 16px; margin:10px 0 0;
+    border-radius:12px; border:1px solid var(--line); background:var(--panel2); color:var(--tx);
+    font-size:16px; font-weight:600; cursor:pointer; text-align:center;
+    transition:transform .08s ease, background .15s ease;
+  }
+  .btn:active{transform:scale(.98)}
+  .btn.pri{background:var(--acc); border-color:var(--acc); color:#1a1300}
+  .btn.ghost{background:transparent; color:var(--mut); font-weight:500; font-size:14px; min-height:44px}
+  .btn.ok{background:var(--good); border-color:var(--good); color:#04160a}
+  .btn.rick{background:var(--rick); border-color:var(--rick); color:#fff}
+  .btn[aria-disabled="true"]{opacity:.45; pointer-events:none}
+  :focus-visible{outline:3px solid var(--acc); outline-offset:2px}
+  input[type=text]{
+    width:100%; min-height:52px; padding:12px 14px; border-radius:12px;
+    border:1px solid var(--line); background:#0b0e13; color:var(--tx); font-size:16px;
+  }
+  /* portal router */
+  .router{border-radius:16px; overflow:hidden; border:1px solid var(--line); background:#f4f6f8; color:#1b2430; margin-bottom:14px}
+  .rhead{background:linear-gradient(90deg,#12325e,#1f5aa8); color:#fff; padding:10px 14px; font-size:13px; display:flex; align-items:center; gap:8px}
+  .rhead .dot{width:8px;height:8px;border-radius:50%;background:#7be495; box-shadow:0 0 6px #7be495}
+  .rbody{padding:18px}
+  .rbody h2{color:#12325e}
+  .bar{height:10px; background:#d9e0e8; border-radius:99px; overflow:hidden; margin:6px 0 10px}
+  .bar i{display:block; height:100%; width:0%; background:linear-gradient(90deg,#1f5aa8,#4d9bff); border-radius:99px; transition:width .2s linear}
+  .mcode{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#5a6b7d; min-height:18px}
+  /* captcha */
+  .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:6px 0 4px}
+  .cell{
+    aspect-ratio:1; border:2px solid var(--line); border-radius:12px; background:var(--panel2);
+    display:flex; align-items:center; justify-content:center; gap:1px; font-size:clamp(18px,7vw,30px);
+    cursor:pointer; user-select:none; padding:4px;
+  }
+  .cell.sel{border-color:var(--acc); background:#3a2f10}
+  .cell.bad{border-color:var(--bad)}
+  .opts{display:flex; gap:10px; margin-top:10px}
+  .opts .btn{flex:1}
+  /* simon */
+  .pads{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0}
+  .pad{aspect-ratio:1.3; border-radius:14px; border:2px solid var(--line); background:var(--panel2); font-size:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none}
+  .pad.lit{filter:brightness(2.2)}
+  .pad.good{border-color:var(--good)}
+  /* boton huye */
+  .huir{position:relative; height:220px; border-radius:14px; border:1px solid var(--line); background:#0b0e13; overflow:hidden; margin-top:8px}
+  .huir .btn{position:absolute; width:auto; min-width:140px; margin:0; left:50%; top:50%; transform:translate(-50%,-50%)}
+  /* diploma */
+  .dip{border:3px double var(--acc); border-radius:14px; padding:18px; text-align:center; background:var(--panel2)}
+  .dip .ttl{font-size:13px; letter-spacing:.18em; color:var(--acc); text-transform:uppercase}
+  .dip .who{font-size:24px; font-weight:800; margin:10px 0 4px}
+  .pwd{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:20px; letter-spacing:.12em; text-decoration:line-through; text-decoration-color:var(--bad); text-decoration-thickness:2px}
+  .sello{font-size:40px; margin:8px 0}
+  /* final */
+  .overlay{position:fixed; inset:0; background:rgba(5,7,10,.96); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:22px; text-align:center; z-index:50}
+  .big{font-size:clamp(26px,8vw,40px); font-weight:900; line-height:1.1; margin:6px 0}
+  .spin{width:26px;height:26px;border:3px solid var(--line); border-top-color:var(--acc); border-radius:50%; animation:sp 1s linear infinite}
+  .ytbox{width:100%; max-width:480px; margin-top:14px; position:relative; border-radius:14px; overflow:hidden; border:1px solid var(--line); background:#000; cursor:pointer}
+  .ytbox img{width:100%; display:block}
+  .ytplay{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:rgba(0,0,0,.35); color:#fff; font-weight:700; font-size:14px; padding:10px}
+  .ytplay .tri{width:0;height:0;border-left:26px solid #fff;border-top:16px solid transparent;border-bottom:16px solid transparent}
+  .ytbox iframe{width:100%; aspect-ratio:16/9; border:0; display:block}
+  .foot{display:flex; align-items:center; justify-content:center; gap:10px; color:var(--mut); font-size:11px; padding:6px 0 20px}
+  #reset{background:none;border:1px solid var(--line);color:var(--mut);border-radius:8px;font-size:11px;padding:4px 8px;cursor:pointer}
+  .toast{position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:var(--panel2); border:1px solid var(--line); color:var(--tx); padding:10px 16px; border-radius:99px; font-size:14px; z-index:60; max-width:92vw; text-align:center; box-shadow:0 6px 24px rgba(0,0,0,.5)}
+  .anim-in{animation:in .25s ease}
+  .shake{animation:shk .4s ease}
+  .pulse{animation:pl 1.2s ease infinite}
+  @keyframes in{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
+  @keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+  @keyframes pl{0%,100%{opacity:1}50%{opacity:.55}}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="sig"></span> Finca Los Almendros <b>· 5G</b></div>
+    <div class="prog" id="prog"></div>
+  </header>
+  <main id="app" aria-live="polite"></main>
+  <footer class="foot">Portal de invitados v2.1 · <button id="reset" type="button">empezar de cero</button></footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ======================================================================
+   ====== EDITA AQUÍ: cambia estos textos y la broma sigue funcionando ======
+   ====================================================================== */
+var CFG = {
+  finca: "Finca Los Almendros",
+  red:   "Finca_Almendros_5G",
+  cumpleaneros: "Luis y Jaime"
+};
+
+var PREGUNTAS = {
+  // Preguntas verdadero/falso (se usan 3 al azar)
+  vf: [
+    { t:"A Luis le parece normal pedir dos croquetas 'para probar' y acabarse las del plato de todos.",
+      ok:true,  why:"Verdadero. Es una técnica de caza reconocida internacionalmente." },
+    { t:"Jaime ha llegado tarde alguna vez diciendo 'ya estoy llegando' mientras todavía estaba en el sofá.",
+      ok:true,  why:"Verdadero. El 'ya estoy llegando' no es una posición, es un estado mental." },
+    { t:"Ninguno de los dos ha llorado nunca viendo una serie.",
+      ok:false, why:"Falso. Los dos lloraron. Y los dos lo negarán delante de sus amigos." },
+    { t:"A Jaime le encanta madrugar los sábados para aprovechar el día.",
+      ok:false, why:"Falso. Los sábados se aprovechan desde el sofá, con luz natural." },
+    { t:"Luis y Jaime discuten siempre de quién paga la ronda y los dos pierden.",
+      ok:true,  why:"Verdadero. La discusión se Resuelve pagando los dos. Siempre." },
+    { t:"El grupo de WhatsApp donde se organizan los planes se llama 'Los Mejores'.",
+      ok:true,  why:"Verdadero. Y en ese grupo jamás se decide nada." }
+  ],
+  // Banco del examen final (se eligen 5 al azar)
+  boss: [
+    { q:"¿Qué pide Luis en el bar 'para probar'?",
+      a:[{t:"Las croquetas de todos", ok:true},{t:"Una aceituna", ok:false},{t:"Agua del grifo", ok:false}],
+      why:"La croqueta ajena sabe más. Es ciencia." },
+    { q:"¿Cuál es la excusa clásica de Jaime para llegar tarde?",
+      a:[{t:"El tren (va en coche)", ok:true},{t:"Me quedé dormido", ok:false},{t:"No me llegó el mensaje", ok:false}],
+      why:"El tren no circula por esa zona, pero la excusa sí circula desde 2014." },
+    { q:"¿Qué hacen Luis y Jaime los domingos por la mañana?",
+      a:[{t:"Quedar para 'un café' que dura tres horas", ok:true},{t:"Ir al gimnasio", ok:false},{t:"Limpiar el coche", ok:false}],
+      why:"Un café de tres horas con magdalenas de testigo." },
+    { q:"Plan de finde que proponen cada semana y nunca hacen:",
+      a:[{t:"La ruta de montaña", ok:true},{t:"Ir al cine", ok:false},{t:"Ver el partido", ok:false}],
+      why:"La ruta existe en el grupo de WhatsApp desde el año pasado." },
+    { q:"Lo primero que hacen al llegar a una finca con piscina:",
+      a:[{t:"Mirar la piscina con los zapatos puestos", ok:true},{t:"Preguntar por el baño", ok:false},{t:"Buscar cobertura", ok:false}],
+      why:"La mirada a la piscina con zapatos es un ritual." },
+    { q:"Si hay paella, Jaime…",
+      a:[{t:"Repite dos veces", ok:true},{t:"Dice que no come", ok:false},{t:"Solo la probará", ok:false}],
+      why:"Nadie ha visto a Jaime decir 'no' a una paella." },
+    { q:"Frase típica al despedirse:",
+      a:[{t:"'Quedamos la semana que viene'", ok:true},{t:"'Ya te llamo'", ok:false},{t:"'Me voy'", ok:false}],
+      why:"La semana que viene nunca llega, pero la frase sí." },
+    { q:"Luis y Jaime se parecen en que…",
+      a:[{t:"Los dos dicen 'esta vez invito yo'", ok:true},{t:"Odia la playa", ok:false},{t:"No beben", ok:false}],
+      why:"Los dos invitan. Los dos pagan. Al final nadie invita." },
+    { q:"Canción que ponen cuando se suben al coche:",
+      a:[{t:"La misma de siempre, la corean", ok:true},{t:"Ninguna, silencio", ok:false},{t:"Un podcast de historia", ok:false}],
+      why:"La corean mal, pero la cantan con el corazón." },
+    { q:"Quiénes son los cumpleañeros de hoy:",
+      a:[{t:"Luis y Jaime", ok:true},{t:"Los dos camareros", ok:false},{t:"El alcalde", ok:false}],
+      why:"Correcto. Por eso estás haciendo este examen." },
+    { q:"Qué hace el grupo cuando un plan sale mal:",
+      a:[{t:"Repetirlo la semana que viene", ok:true},{t:"Aprender la lección", ok:false},{t:"Buscar otro grupo", ok:false}],
+      why:"Un plan no sale mal: sale 'versión beta'." },
+    { q:"El grupo de WhatsApp de Luis y Jaime se llama:",
+      a:[{t:"'Los Mejores'", ok:true},{t:"'Familia'", ok:false},{t:"'Vecinos'", ok:false}],
+      why:"Ahí se deciden todos los planes. O sea, ninguno." }
+  ]
+};
+
+/* ======================================================================
+   ====== FIN EDITA AQUÍ ==================================================
+   ====================================================================== */
+
+var YT_ID = "dQw4w9WgXcQ"; // rickroll
+var app = document.getElementById("app");
+var progEl = document.getElementById("prog");
+var G = { nombre:"", nivel:0 };
+var toastTimer = null;
+
+var ERRORES_CAPTCHA = [
+  "Eso no es un pastel, es una empanada disfrazada.",
+  "Ni Google aprobaría este captcha.",
+  "Estás seleccionando como Jaime elige restaurante: mal.",
+  "Luis tampoco distingue un 🎂 de una 🥳 y hoy es su cumpleaños.",
+  "¿Seguro? Hasta el router está decepcionado."
+];
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function rnd(n){ return Math.floor(Math.random()*n); }
+function pick(a,n){ var c=a.slice(), o=[]; while(o.length<n && c.length){ o.push(c.splice(rnd(c.length),1)[0]); } return o; }
+function toast(msg, ms){
+  var old = $("toast"); if (old) old.remove();
+  var t = document.createElement("div"); t.id="toast"; t.className="toast"; t.textContent = msg;
+  document.body.appendChild(t);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.remove(); }, ms||2400);
+}
+function setProg(txt){ progEl.textContent = txt; }
+function go(screen){ render(screen); window.scrollTo(0,0); }
+
+/* ---------- pantallas ---------- */
+
+var screens = {};
+
+screens.cebo = function(){
+  setProg("");
+  app.className = "anim-in";
+  app.innerHTML =
+    '<div class="router">' +
+      '<div class="rhead"><span class="dot"></span> Conectado a ' + esc(CFG.red) + ' · 100% señal</div>' +
+      '<div class="rbody">' +
+        '<h2>Bienvenido a la red de la finca</h2>' +
+        '<p class="mcode" id="rstep">Verificando acceso a Internet…</p>' +
+        '<div class="bar"><i id="rbar"></i></div>' +
+        '<p class="mcode" id="rdet"></p>' +
+      '</div>' +
+    '</div>';
+  var bar = $("rbar"), step = $("rstep"), det = $("rdet");
+  var pasos = ["Verificando certificado de seguridad…","Midiendo ancho de banda…","Comparando ancho de banda con el de la ciudad…","Consultando lista de invitados…"];
+  var p = 0, i = 0;
+  var iv = setInterval(function(){
+    p += 4 + rnd(5); if (p > 100) p = 100;
+    bar.style.width = p + "%";
+    if (p > i*25 && i < pasos.length){ step.textContent = pasos[i++]; }
+  }, 110);
+  setTimeout(function(){
+    clearInterval(iv);
+    bar.style.width = "100%";
+    step.textContent = "ERROR 401 — Autenticación requerida";
+    det.textContent = "Esta red no tiene salida a Internet. Para verificarte hay que acreditar que conoces a los cumpleañeros.";
+    setTimeout(function(){ go("error"); }, 900);
+  }, 2700);
+};
+
+screens.error = function(){
+  setProg("");
+  app.innerHTML =
+    '<div class="card">' +
+      '<h1>Error 401</h1>' +
+      '<p class="mono small mut">Código: RED_SIN_SALIDA · Soporte: recepción (cerrado por fiesta)</p>' +
+      '<p>La red <b>' + esc(CFG.red) + '</b> está protegida por un portal de invitados. Antes de darte la contraseña tendrás que superar <b>7 fases</b> de verificación.</p>' +
+      '<p class="mut small">Tranquilo: son solo unas preguntas sobre <b>' + esc(CFG.cumpleaneros) + '</b>. Si los conoces de verdad, esto está chupado. Si no, siempre puedes mirar el móvil de al lado.</p>' +
+      '<button class="btn pri" id="verif" type="button">Verificar acceso</button>' +
+    '</div>';
+  $("verif").onclick = function(){ go("intro"); };
+};
+
+screens.intro = function(){
+  setProg("");
+  app.innerHTML =
+    '<div class="card">' +
+      '<h1>Portal de invitados</h1>' +
+      '<p class="mut">Identifícate para que luego el diploma tenga tu nombre. Puedes poner el real, el del grupo de WhatsApp o el que te dieron al nacer.</p>' +
+      '<input type="text" id="nom" maxlength="24" placeholder="Tu nombre" autocomplete="off">' +
+      '<button class="btn pri" id="go" type="button">Comenzar verificación</button>' +
+    '</div>';
+  var inp = $("nom"); setTimeout(function(){ inp.focus(); }, 60);
+  function start(){
+    var v = inp.value.trim().slice(0,24);
+    G.nombre = v || "Invitado ilustre";
+    go("n1");
+  }
+  $("go").onclick = start;
+  inp.addEventListener("keydown", function(e){ if (e.key === "Enter") start(); });
+};
+
+/* N1: identificacion */
+screens.n1 = function(){
+  setProg("Fase 1 / 7");
+  G.nivel = 1;
+  var opciones = [
+    { t:"Luis y Jaime", ok:true },
+    { t:"Lvis y Jaim", ok:false },
+    { t:"Luis y Jaume", ok:false },
+    { t:"Los dos camareros", ok:false }
+  ];
+  opciones = pick(opciones, 4);
+  app.innerHTML =
+    '<div class="card anim-in">' +
+      '<h2>Fase 1 · ¿Quién está de cumple?</h2>' +
+      '<p class="mut">Empieza suave. Elige la opción correcta y el portal te deja seguir.</p>' +
+      '<div id="opts"></div>' +
+    '</div>';
+  var box = $("opts");
+  opciones.forEach(function(o, idx){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "btn"; b.textContent = o.t;
+    b.onclick = function(){
+      if (o.ok){ b.className = "btn ok"; setTimeout(function(){ go("n2"); }, 500); }
+      else {
+        b.className = "btn"; b.style.borderColor = "var(--bad)";
+        app.classList.remove("shake"); void app.offsetWidth; app.classList.add("shake");
+        toast("¿Seguro? Mira el grupo de WhatsApp.");
+      }
+    };
+    box.appendChild(b);
+  });
+};
+
+/* N2: captcha inhumano */
+screens.n2 = function(){
+  setProg("Fase 2 / 7");
+  G.nivel = 2;
+  var celdas = [
+    ["🎂","🥳"],["🎂","🍺"],["🥳","🎁"],["🍺","🎂"],
+    ["🎂","🥳"],["🍰","🥳"],["🥳","🍺"],["🎂","🥳"],
+    ["🍰","🎉"],["🎂","🎈"],["🕺","🥳"],["🥳","🎶"]
+  ];
+  var fallos = 0;
+  var sel = {};
+  app.innerHTML =
+    '<div class="card anim-in" id="cap">' +
+      '<h2>Fase 2 · Verifica que no eres un robot</h2>' +
+      '<p class="mut small">Selecciona todas las casillas que contengan <b>🎂 junto a 🥳</b>. Las que tengan solo uno de los dos no valen.</p>' +
+      '<div class="grid" id="grid"></div>' +
+      '<button class="btn pri" id="ok" type="button">Verificar</button>' +
+    '</div>';
+  var grid = $("grid");
+  celdas.forEach(function(c, i){
+    var d = document.createElement("div");
+    d.className = "cell"; d.setAttribute("role","checkbox"); d.setAttribute("aria-checked","false");
+    d.dataset.ok = (c.indexOf("🎂")>=0 && c.indexOf("🥳")>=0) ? "1" : "0";
+    d.innerHTML = c.map(esc).join("");
+    d.onclick = function(){
+      sel[i] = !sel[i];
+      d.className = "cell" + (sel[i] ? " sel" : "");
+      d.setAttribute("aria-checked", sel[i] ? "true" : "false");
+    };
+    grid.appendChild(d);
+  });
+  $("ok").onclick = function(){
+    var marcadas = Object.keys(sel).filter(function(k){ return sel[k]; });
+    var esValida = function(k){ return celdas[k].indexOf("🎂")>=0 && celdas[k].indexOf("🥳")>=0; };
+    var bien = marcadas.every(esValida);
+    var todas = marcadas.filter(esValida).length;
+    if (bien && marcadas.length === 3 && todas === 3){
+      grid.querySelectorAll(".cell").forEach(function(c){ c.classList.add("good"); });
+      setTimeout(function(){ go("n3"); }, 450);
+      return;
+    }
+    fallos++;
+    var card = $("cap");
+    card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+    var msg;
+    if (fallos === 2) msg = "Pista: son tres, y son las que parecen una fiesta de verdad (🎂 + 🥳).";
+    else if (fallos >= 3) msg = "El captcha se apiada de ti. Pasas. No se lo digas a nadie.";
+    else msg = ERRORES_CAPTCHA[rnd(ERRORES_CAPTCHA.length)];
+    toast(msg, 3000);
+    if (fallos >= 3) setTimeout(function(){ go("n3"); }, 1400);
+  };
+};
+
+/* N3: verdadero/falso */
+screens.n3 = function(){
+  setProg("Fase 3 / 7");
+  G.nivel = 3;
+  var lista = pick(PREGUNTAS.vf, 3);
+  var idx = 0, aciertos = 0;
+  app.innerHTML =
+    '<div class="card anim-in" id="vf">' +
+      '<h2>Fase 3 · ¿Verdad o mentira?</h2>' +
+      '<p class="mut small">Sobre ' + esc(CFG.cumpleaneros) + '. Solo los amigos de verdad aprueban.</p>' +
+      '<div id="vbody"></div>' +
+    '</div>';
+  function mostrar(){
+    if (idx >= lista.length){
+      setTimeout(function(){
+        toast(aciertos === lista.length ? "¡Pleno! Les conoces demasiado bien." : "Bueno… casi. Se pasa por los pelos.", 2600);
+        go("n4");
+      }, 700);
+      return;
+    }
+    var q = lista[idx];
+    $("vbody").innerHTML =
+      '<p><b>' + (idx+1) + '/' + lista.length + '.</b> ' + esc(q.t) + '</p>' +
+      '<div class="opts">' +
+        '<button class="btn ok" id="bv" type="button">Verdad</button>' +
+        '<button class="btn" id="bf" type="button">Mentira</button>' +
+      '</div>' +
+      '<p class="mut small" id="vfb" style="margin-top:12px"></p>';
+    function resp(val, btn){
+      var ok = (val === q.ok);
+      if (ok) aciertos++;
+      btn.disabled = true; $("bf").disabled = true; $("bv").disabled = true;
+      btn.className = "btn" + (ok ? " ok" : "");
+      btn.style.borderColor = ok ? "var(--good)" : "var(--bad)";
+      var other = $(val ? "bf" : "bv");
+      if (other && !ok) other.className = "btn ok"; else if (other) other.className = "btn ghost";
+      $("vfb").textContent = (ok ? "✔ " : "✘ ") + q.why;
+      setTimeout(function(){ idx++; mostrar(); }, 2100);
+    }
+    $("bv").onclick = function(){ resp(true, this); };
+    $("bf").onclick = function(){ resp(false, this); };
+  }
+  mostrar();
+};
+
+/* N4: simon */
+screens.n4 = function(){
+  setProg("Fase 4 / 7");
+  G.nivel = 4;
+  var emojis = ["🍺","🎂","🥳","🎵"];
+  var colores = ["#1f5aa8","#a8441f","#1f8a4d","#8a1f8a"];
+  var rondas = 4; // empieza en 3 y acaba en 6
+  var ronda = 0, fallos = 0;
+  var padEls = [];
+  app.innerHTML =
+    '<div class="card anim-in" id="sim">' +
+      '<h2>Fase 4 · Memoria de después de la tercera</h2>' +
+      '<p class="mut small">Repite la secuencia. Como el wifi de la finca: si falla, se corta y vuelta a empezar.</p>' +
+      '<div class="pads" id="pads"></div>' +
+      '<p id="smsj" class="small" style="text-align:center;min-height:22px"></p>' +
+    '</div>';
+  var pads = $("pads");
+  emojis.forEach(function(e, i){
+    var p = document.createElement("div");
+    p.className = "pad"; p.textContent = e; p.setAttribute("role","button"); p.tabIndex = 0;
+    p.style.background = "var(--panel2)";
+    p.dataset.i = i;
+    function tap(){ pulsar(i); }
+    p.addEventListener("click", tap);
+    p.addEventListener("keydown", function(ev){ if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); tap(); } });
+    pads.appendChild(p); padEls.push(p);
+  });
+  function pulsar(i){
+    var p = padEls[i];
+    p.classList.add("lit"); p.style.background = colores[i];
+    setTimeout(function(){ p.classList.remove("lit"); p.style.background = "var(--panel2)"; }, 260);
+    if (jugando) comprobar(i);
+  }
+  var secuencia = [], jugando = false, turno = 0;
+  function nuevaRonda(){
+    ronda++;
+    turno = 0; jugando = false;
+    secuencia = [];
+    for (var i=0;i<ronda+2;i++) secuencia.push(rnd(4));
+    $("smsj").textContent = "Ronda " + ronda + " de " + rondas + " · mira la secuencia…";
+    var k = 0;
+    var iv = setInterval(function(){
+      if (k >= secuencia.length){ clearInterval(iv); jugando = true; $("smsj").textContent = "¡Repítela!"; return; }
+      var n = secuencia[k++];
+      padEls[n].classList.add("lit"); padEls[n].style.background = colores[n];
+      setTimeout(function(){ padEls.forEach(function(p){ p.classList.remove("lit"); p.style.background = "var(--panel2)"; }); }, 420);
+    }, 620);
+  }
+  function comprobar(i){
+    if (!jugando) return;
+    if (secuencia[turno] === i){
+      turno++;
+      if (turno >= secuencia.length){
+        jugando = false;
+        $("smsj").textContent = "¡Correcto!";
+        if (ronda >= rondas){ setTimeout(function(){ go("n5"); }, 900); }
+        else setTimeout(nuevaRonda, 1100);
+      }
+    } else {
+      jugando = false;
+      fallos++;
+      if (fallos >= 2){
+        $("smsj").textContent = "Dos fallos… vale, se pasa. Nadie ha dicho nada.";
+        setTimeout(function(){ go("n5"); }, 1300);
+      } else {
+        $("smsj").textContent = "Fallaste. Se corta la conexión. Repetimos ronda.";
+        setTimeout(nuevaRonda, 1300);
+      }
+    }
+  }
+  nuevaRonda();
+};
+
+/* N5: boton que huye */
+screens.n5 = function(){
+  setProg("Fase 5 / 7");
+  G.nivel = 5;
+  var intentos = 0, rindio = false;
+  app.innerHTML =
+    '<div class="card anim-in" id="hu">' +
+      '<h2>Fase 5 · Pulsa el botón</h2>' +
+      '<p class="mut small">Sí, ese. El de abajo. Bueno, el que puedas.</p>' +
+      '<div class="huir" id="huir">' +
+        '<button class="btn pri" id="huye" type="button">CONÉCTATE AQUÍ</button>' +
+      '</div>' +
+      '<p class="mut small" id="hmsg" style="text-align:center;min-height:20px"></p>' +
+    '</div>';
+  var zona = $("huir"), btn = $("huye"), msg = $("hmsg");
+  function mover(){
+    if (rindio) return;
+    intentos++;
+    var w = zona.clientWidth, h = zona.clientHeight, bw = 150, bh = 52;
+    var x = 10 + Math.random()*(w-bw-20);
+    var y = 10 + Math.random()*(h-bh-20);
+    btn.style.left = x + "px"; btn.style.top = y + "px"; btn.style.transform = "none";
+    if (intentos < 4){
+      var frases = ["¡Ese no!","Casi…","Como esquivar a un comercial en el mercadillo."];
+      msg.textContent = frases[Math.min(intentos-1, frases.length-1)];
+    } else {
+      rindio = true;
+      msg.textContent = "Vale, me rindo. Llevaba años huyendo de ti. Púlsame.";
+      btn.textContent = "Vale, me rindo";
+    }
+  }
+  btn.addEventListener("pointerenter", function(e){ if (!rindio) mover(); });
+  btn.addEventListener("pointerdown", function(e){ if (!rindio){ e.preventDefault(); mover(); } });
+  btn.addEventListener("click", function(){ if (rindio) go("boss"); });
+};
+
+/* BOSS: examen sorpresa */
+screens.boss = function(){
+  setProg("Fase 6 / 7");
+  G.nivel = 6;
+  var bank = PREGUNTAS.boss.slice();
+  var rondas = 0, idx = 0, aciertos = 0;
+  var actual = pick(bank, 5);
+  app.innerHTML =
+    '<div class="card anim-in" id="bs">' +
+      '<h2>Fase 6 · Examen sorpresa</h2>' +
+      '<p class="mut small">5 de 12 preguntas, al azar. Mínimo un 4 para aprobar. Se puede ir a recuperación.</p>' +
+      '<div id="bbody"></div>' +
+    '</div>';
+  function mostrar(){
+    if (idx >= actual.length){
+      var nota = aciertos;
+      setTimeout(function(){
+        if (nota >= 4){
+          toast("¡Aprobado con un " + nota + "!", 2200);
+          setTimeout(function(){ go("diploma"); }, 700);
+        } else {
+          toast("Un " + nota + ". A recuperación.", 2200);
+          setTimeout(function(){
+            rondas++;
+            if (rondas >= 2){
+              toast("El profesor se apiada de ti. Pasa.", 2400);
+              setTimeout(function(){ go("diploma"); }, 900);
+            } else {
+              idx = 0; aciertos = 0;
+              var usadas = actual.map(function(q){ return q.q; });
+              var resto = bank.filter(function(q){ return usadas.indexOf(q.q) < 0; });
+              actual = pick(resto.length >= 5 ? resto : bank, 5);
+              $("bs").innerHTML =
+                '<h2>Fase 6 · Recuperación</h2>' +
+                '<p class="mut small">Preguntas distintas. Mismo mínimo: 4.</p>' +
+                '<div id="bbody"></div>';
+              mostrar();
+            }
+          }, 900);
+        }
+      }, 600);
+      return;
+    }
+    var q = actual[idx];
+    var opts = pick(q.a, q.a.length);
+    $("bbody").innerHTML =
+      '<p><b>' + (idx+1) + '/5.</b> ' + esc(q.q) + '</p>' +
+      '<div id="bopts"></div>' +
+      '<p class="mut small" id="bfb" style="margin-top:10px"></p>';
+    var box = $("bopts");
+    opts.forEach(function(o){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "btn"; b.textContent = o.t;
+      b.onclick = function(){
+        box.querySelectorAll("button").forEach(function(x){ x.disabled = true; });
+        if (o.ok){ b.className = "btn ok"; aciertos++; }
+        else {
+          b.style.borderColor = "var(--bad)";
+          var buen = q.a.filter(function(x){ return x.ok; })[0];
+          var bueno = Array.prototype.filter.call(box.querySelectorAll("button"), function(x){ return x.textContent === buen.t; })[0];
+          if (bueno) bueno.className = "btn ok";
+        }
+        $("bfb").textContent = q.why;
+        setTimeout(function(){ idx++; mostrar(); }, 2200);
+      };
+      box.appendChild(b);
+    });
+  }
+  mostrar();
+};
+
+/* Diploma */
+screens.diploma = function(){
+  setProg("Fase 7 / 7");
+  var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  var pwd = ""; for (var i=0;i<4;i++) pwd += chars[rnd(chars.length)];
+  var pwd2 = ""; for (var j=0;j<4;j++) pwd2 += chars[rnd(chars.length)];
+  app.innerHTML =
+    '<div class="card anim-in">' +
+      '<div class="dip">' +
+        '<div class="ttl">Acreditativo de acceso a la red</div>' +
+        '<div class="mut small">Finca Los Almendros · ' + esc(CFG.red) + '</div>' +
+        '<div class="who">' + esc(G.nombre) + '</div>' +
+        '<p class="mut small">Ha superado las 7 fases del portal de invitados y queda autorizado a:</p>' +
+        '<p style="margin:6px 0"><b>Contraseña de la red:</b><br><span class="pwd">' + pwd + '-' + pwd2 + '</span></p>' +
+        '<div class="sello">🎉</div>' +
+        '<p class="mut small">(La contraseña está tachada a propósito. Es una metáfora.)</p>' +
+      '</div>' +
+      '<button class="btn pri" id="desc" type="button">📶 DESCARGAR CONTRASEÑA</button>' +
+      '<button class="btn ghost" id="repetir" type="button">Pasarle la broma a otro amigo</button>' +
+    '</div>';
+  $("desc").onclick = function(){
+    go("final");
+  };
+  $("repetir").onclick = function(){ resetJuego(); };
+};
+
+/* Final: rickroll */
+screens.final = function(){
+  setProg("Completado");
+  app.innerHTML =
+    '<div class="card" style="text-align:center">' +
+      '<div class="spin" style="margin:18px auto"></div>' +
+      '<p class="mut" id="fmsg">Conectando a ' + esc(CFG.red) + '…</p>' +
+    '</div>';
+  var n = 0;
+  var pasos = ["Negociando IP…","Buscando repetidor…","Cambiando la contraseña por otra…","Desactivando el cortafuegos…"];
+  var iv = setInterval(function(){
+    n++;
+    if (n < pasos.length) $("fmsg").textContent = pasos[n];
+  }, 420);
+  setTimeout(function(){
+    clearInterval(iv);
+    var ov = document.createElement("div");
+    ov.className = "overlay anim-in";
+    ov.innerHTML =
+      '<div class="big">NO HAY WIFI.<br>SOLO BARRA LIBRE.</div>' +
+      '<p class="mut">' + esc(CFG.cumpleaneros) + ' os agradecen la visita.<br>Feliz cumpleaños. 🎉</p>' +
+      '<div class="ytbox" id="yt" role="button" tabindex="0" aria-label="Ver el vídeo">' +
+        '<img src="https://i.ytimg.com/vi/' + YT_ID + '/hqdefault.jpg" alt="Vídeo sorpresa">' +
+        '<div class="ytplay"><div class="tri"></div><span>Lo que Luis y Jaime hicieron el finde pasado</span></div>' +
+      '</div>' +
+      '<p class="mut small" style="margin-top:14px">Ningún router ha sido dañado en esta broma.</p>' +
+      '<button class="btn ghost" id="ovreset" type="button" style="margin-top:10px;max-width:220px">Empezar de cero</button>';
+    document.body.appendChild(ov);
+    function bindReset(){
+      var b = $("ovreset");
+      if (b) b.onclick = function(){ ov.remove(); resetJuego(); };
+    }
+    function abrir(){
+      ov.innerHTML =
+        '<div class="big" style="font-size:clamp(20px,6vw,28px)">NO HAY WIFI. SOLO BARRA LIBRE.</div>' +
+        '<iframe src="https://www.youtube-nocookie.com/embed/' + YT_ID + '?autoplay=1&rel=0" ' +
+        'allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen ' +
+        'style="width:min(94vw,520px);aspect-ratio:16/9;border:0;border-radius:14px;margin-top:10px"></iframe>' +
+        '<button class="btn ghost" id="ovreset" type="button" style="margin-top:12px;max-width:220px">Empezar de cero</button>';
+      bindReset();
+    }
+    var yt = $("yt");
+    yt.onclick = abrir;
+    yt.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); abrir(); } });
+    bindReset();
+  }, 2100);
+};
+
+function resetJuego(){
+  try { localStorage.removeItem("cumpleWifi.v1"); } catch(e){}
+  G = { nombre:"", nivel:0 };
+  go("cebo");
+}
+
+function render(screen){
+  try { screens[screen](); }
+  catch(err){
+    app.innerHTML = '<div class="card"><h1>Ups</h1><p class="mut">Algo se ha roto en la verificación. Vuelve a empezar.</p><button class="btn pri" onclick="document.getElementById(&quot;reset&quot;).click()">Empezar de cero</button></div>';
+    console.error(err);
+  }
+}
+
+document.getElementById("reset").onclick = function(){ resetJuego(); };
+
+go("cebo");
+})();
+</script>
+  <script crossorigin type="text/javascript" src="https://codesandbox.io/static/js/watermark-button.eeb14a97b.js"></script>
+  </body>
+</html>
