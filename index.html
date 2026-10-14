@@ -69,6 +69,23 @@
     cursor:pointer; user-select:none; padding:4px;
   }
   .cell.sel{border-color:var(--acc); background:#3a2f10}
+  /* celdas con foto */
+  .cell.foto{padding:0; overflow:hidden; background:#0b0e13}
+  .cell.foto img{width:100%; height:100%; object-fit:cover; display:block}
+  .cell.foto .fallback{display:flex; align-items:center; justify-content:center; height:100%; font-size:26px; color:var(--mut)}
+  /* whatsapp */
+  .wa-wrap{background:#efe7dd; border-radius:14px; padding:10px; margin-bottom:10px}
+  .wa-head{display:flex; align-items:center; gap:8px; padding:2px 4px 10px; border-bottom:1px solid #d6ccc2; margin-bottom:10px}
+  .wa-head .av{width:30px; height:30px; border-radius:50%; background:#25d366; color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px}
+  .wa-head b{color:#111b21; font-size:14px}
+  .wa-head span{color:#667781; font-size:11px}
+  .burbuja{position:relative; background:#d9fdd3; color:#111b21; border-radius:12px; border-top-right-radius:3px; padding:10px 12px; min-height:52px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; box-shadow:0 1px 0 rgba(0,0,0,.08)}
+  .burbuja:after{content:""; position:absolute; right:-8px; top:0; width:0; height:0; border:8px solid transparent; border-top-color:#d9fdd3; border-right:0}
+  .chip.wa{background:rgba(17,27,33,.07); color:#111b21; border:0; margin:0}
+  .chip.wa.placed{background:#25d366; color:#fff}
+  .wa-meta{margin-top:8px; font-size:13px; color:#54656f}
+  .wa-meta b{color:#111b21}
+  .wa-meta .sub{display:block; font-style:italic}
   .opts{display:flex; gap:10px; margin-top:10px}
   .opts .btn{flex:1}
   /* chips ordenar frases */
@@ -194,33 +211,45 @@ var CFG = {
   finca: "Cañada de la gitana",
   red:   "CanadaDeLaGitana_5G",
   cumpleaneros: "Luis y Jaime",
-  frasesTecleo: ["sincobertura", "felizcumple", "barralibre"],
   palabraTruco: "truco",
-  frases: [
-    "ya estoy llegando dijo jaime sin moverse del sofa",
-    "esta vez invito yo dijeron los dos a la vez"
+  frasesTecleo: ["toyperfectonomeeperesmñana", "sihacefaltaotracopa", "quenohablesfuerte"],
+  frasesWhatsapp: [
+    { texto:"Más de perfecto si era simplemente por quitar las coño", autor:"Luis" },
+    { texto:"Tetetetete sabababaea", autor:"Luis", sub:"El dominio del castellano de madrugada" },
+    { texto:"Me dijo tu y yo somos calvos", autor:"Jaime", sub:"La dura aceptación de la línea de pelo" },
+    { texto:"Guarra? Le tien que estar temblando las patas a la muy perra", autor:"Padre de Luis" },
+    { texto:"El equipo C.JIMÉNEZ solo presenta 4 jugadores. No se disputa el partido", autor:"Javier Molina Cerdán alias Javi Neymar", sub:"Compromiso deportivo intachable" },
+    { texto:"De la mamá de la mamá de la mamá", autor:"Luis" },
+    { texto:"Eres malísimo el peor árbitro del IMD con diferencia", autor:"Jota Acyda", sub:"Respeto institucional al arbitraje amateur" }
   ]
 };
 
 var PREGUNTAS = {
-  // Preguntas verdadero/falso (se usan 3 al azar)
-  vf: [
-    { t:"A Luis le parece normal pedir dos croquetas 'para probar' y acabarse las del plato de todos.",
-      ok:true,  why:"Verdadero. Es una técnica de caza reconocida internacionalmente." },
-    { t:"Jaime ha llegado tarde alguna vez diciendo 'ya estoy llegando' mientras todavía estaba en el sofá.",
-      ok:true,  why:"Verdadero. El 'ya estoy llegando' no es una posición, es un estado mental." },
-    { t:"Ninguno de los dos ha llorado nunca viendo una serie.",
-      ok:false, why:"Falso. Los dos lloraron. Y los dos lo negarán delante de sus amigos." },
-    { t:"A Jaime le encanta madrugar los sábados para aprovechar el día.",
-      ok:false, why:"Falso. Los sábados se aprovechan desde el sofá, con luz natural." },
-    { t:"Luis y Jaime discuten siempre de quién paga la ronda y los dos pierden.",
-      ok:true,  why:"Verdadero. La discusión se resuelve pagando los dos. Siempre." },
-    { t:"El grupo de WhatsApp donde se organizan los planes se llama 'Los Mejores'.",
-      ok:true,  why:"Verdadero. Y en ese grupo jamás se decide nada." },
-    { t:"Luis y Jaime han dicho 'este finde descansamos' más de diez veces este año.",
-      ok:true,  why:"Verdadero. El finde de descanso es una especie mitológica." },
-    { t:"A Jaime le da pereza hasta elegir qué ver en el sofá.",
-      ok:true,  why:"Verdadero. Puede tardar más en elegir película que la película en acabar." }
+  // Fase 3: tres preguntas fijas y obligatorias
+  fase3: [
+    { tipo:"multi",
+      q:"¿Qué famoso instrumento musical es capaz de tocar Luis utilizando únicamente partes de su cuerpo?",
+      opciones:["La trompeta","El cajón flamenco","La guitarra","La flauta dulce"],
+      correctas:[0,1],
+      error:"Falso virtuoso. No toques nada más hasta preguntarle al interesado cómo saca el compás." },
+    { tipo:"single",
+      q:"¿Cómo se hizo Jaime la cicatriz que tiene en la cara?",
+      opciones:[
+        "Estaba en la Iglesia y se comió un banco.",
+        "Se lo hizo Oli de un zarpazo.",
+        "Ocurrió durante una excursión escolar de senderismo en 2014, cuando intentó saltar una valla metálica oxidada para recuperar un balón de fútbol que se había colado en una propiedad privada supuestamente vigilada por tres mastines leoneses, resbalando en el último segundo con una piedra húmeda cubierta de musgo y dándose de lleno contra una estaca de madera astillada que le rozó la mejilla izquierda mientras todos sus compañeros de clase se reían pensando que solo se había tropezado con una raíz.",
+        "En realidad no tiene ninguna cicatriz, te lo estás inventando."],
+      correcta:0,
+      error:"Menuda película te has montado. Deja de inventarte epopeyas para tapar una torpeza básica." },
+    { tipo:"single",
+      q:"Cuando Jaime y Luis tenían unos 12 y 14 años estaban con un amigo de 16 (alias Antonio) y aparecieron varios gitanos a pedirles el balón con el que jugaban. Antonio les plantó cara. ¿Qué ocurrió a continuación?",
+      opciones:[
+        "Jaime se fue corriendo y Luis y Antonio se pegaron con los gitanos.",
+        "Los 3 se quedaron con dos cojones y es la única vez en su vida que se han pegado con alguien. Obviamente perdieron, y el balón también.",
+        "Jaime y Luis se metieron a la fábrica de Luis y oyeron desde dentro cómo estampaban, empotraban, reventaban, puppeteaban, desguazaban, aplastaban y percutían a Antonio.",
+        "Los 3 se fueron corriendo y después de 15 minutos de persecución los perdieron. Al día siguiente la puerta de la fábrica de Luis amaneció con una polla dibujada con grafiti."],
+      correcta:2,
+      error:"Mucho valor ficticio veo por aquí. Los hechos reales fueron bastante más cobardes. Inténtalo de nuevo." }
   ],
   // Banco del examen final (se eligen 10 al azar de 20)
   boss: [
@@ -286,6 +315,43 @@ var PREGUNTAS = {
       why:"Un plan tranquilo, en este grupo, es ciencia ficción." }
   ]
 };
+
+/* ---- Fotos de la fase 2 (rondas visuales). ok:1 = hay que marcarla ---- */
+var FOTOS = [
+  { consigna:"Selecciona todas las casillas donde aparezca David Broncano.",
+    celdas:[
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/David_Broncano.JPG/330px-David_Broncano.JPG", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Premios_Goya_2019_-_David_Broncano.jpg/330px-Premios_Goya_2019_-_David_Broncano.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/El_c%C3%B3mico_David_Broncano_y_el_pianista_Mario_Mora_inauguran_este_jueves_el_ciclo_Du%C3%B3logos_en_el_Centro_Cultural_Conde_Duque_01.jpg/330px-El_c%C3%B3mico_David_Broncano_y_el_pianista_Mario_Mora_inauguran_este_jueves_el_ciclo_Du%C3%B3logos_en_el_Centro_Cultural_Conde_Duque_01.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/El_c%C3%B3mico_David_Broncano_y_el_pianista_Mario_Mora_inauguran_este_jueves_el_ciclo_Du%C3%B3logos_en_el_Centro_Cultural_Conde_Duque_03.jpg/330px-El_c%C3%B3mico_David_Broncano_y_el_pianista_Mario_Mora_inauguran_este_jueves_el_ciclo_Du%C3%B3logos_en_el_Centro_Cultural_Conde_Duque_03.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Saint-L%C3%B4_-_Rennes_CFA2_20150523_-_Ousmane_Demb%C3%A9l%C3%A9_1.JPG/330px-Saint-L%C3%B4_-_Rennes_CFA2_20150523_-_Ousmane_Demb%C3%A9l%C3%A9_1.JPG", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Saint-L%C3%B4_-_Rennes_CFA2_20150523_-_Ousmane_Demb%C3%A9l%C3%A9_2.JPG/330px-Saint-L%C3%B4_-_Rennes_CFA2_20150523_-_Ousmane_Demb%C3%A9l%C3%A9_2.JPG", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Saint-L%C3%B4_-_Rennes_CFA2_20150523_-_Ousmane_Demb%C3%A9l%C3%A9_3.JPG/330px-Saint-L%C3%B4_-_Rennes_CFA2_20150523_-_Ousmane_Demb%C3%A9l%C3%A9_3.JPG", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/Stade_rennais_-_Le_Havre_AC_20150708_28.JPG/330px-Stade_rennais_-_Le_Havre_AC_20150708_28.JPG", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Ousmane_Demb%C3%A9l%C3%A9_World_Cup_Trophy.jpg/330px-Ousmane_Demb%C3%A9l%C3%A9_World_Cup_Trophy.jpg", ok:0}
+    ]},
+  { consigna:"Selecciona todas las casillas donde aparezca Mercedes Milá.",
+    celdas:[
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Mercedes_mila12.jpg/330px-Mercedes_mila12.jpg", ok:1},
+      {u:"https://upload.wikimedia.org/wikipedia/commons/d/d1/Mercedes_Mil%C3%A14.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Mercedes_Mil%C3%A1.jpg/330px-Mercedes_Mil%C3%A1.jpg", ok:1},
+      {u:"https://upload.wikimedia.org/wikipedia/commons/0/0a/Mercedes_mila12_%28cropped%29.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/Luka_Modri%C4%87_Real_Madrid.jpg/330px-Luka_Modri%C4%87_Real_Madrid.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Luka_Modri%C4%87_in_2018.jpg/330px-Luka_Modri%C4%87_in_2018.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Modric_in_LIV_VS_RMA_2024_%28cropped%29.jpg/330px-Modric_in_LIV_VS_RMA_2024_%28cropped%29.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Vinicius_Jr_2021.jpg/330px-Vinicius_Jr_2021.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Vin%C3%ADcius_J%C3%BAnior_Brazil_V_Morocco_13_June_2026-207_%28cropped%29.jpg/330px-Vin%C3%ADcius_J%C3%BAnior_Brazil_V_Morocco_13_June_2026-207_%28cropped%29.jpg", ok:0}
+    ]},
+  { consigna:"Selecciona todas las casillas donde aparezca Alvise Pérez.",
+    celdas:[
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Alvise_P%C3%A9rez_en_los_Premios_HO_2021.jpg/330px-Alvise_P%C3%A9rez_en_los_Premios_HO_2021.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/1720511531544_20240709_PEREZ_FERNANDEZ_Luis_ES_004.jpg/330px-1720511531544_20240709_PEREZ_FERNANDEZ_Luis_ES_004.jpg", ok:1},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Malaga_Film_Festival_2025_-_Marina_Rivera_%28cropped%29.jpg/330px-Malaga_Film_Festival_2025_-_Marina_Rivera_%28cropped%29.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/Premios_Goya_2026_-_Marina_Rivera.jpg/330px-Premios_Goya_2026_-_Marina_Rivera.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Vinicius_Jr_2018_%28cropped%29.jpg/330px-Vinicius_Jr_2018_%28cropped%29.jpg", ok:0},
+      {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Ousmane_Demb%C3%A9l%C3%A9_World_Cup_Trophy.jpg/330px-Ousmane_Demb%C3%A9l%C3%A9_World_Cup_Trophy.jpg", ok:0}
+    ]}
+];
 /* ======================================================================
    ====== FIN EDITA AQUÍ ==================================================
    ====================================================================== */
@@ -307,7 +373,7 @@ var MAZE2 = [
   [0,1,1,1,1],
   [0,0,0,0,0]
 ];
-var PADS_EMO = ["\u{1F37A}","\u{1F382}","\u{1F973}","\u{1F3B5}"];
+var PADS_EMO = ["\u{1F943}","\u{1F959}","\u{1F48A}","\u{1F92E}"]; // garrafon, kebab, paracetamol, arcada
 var PADS_COL = ["#1f5aa8","#a8441f","#1f8a4d","#8a1f8a"];
 
 var app = document.getElementById("app");
@@ -351,8 +417,12 @@ $("notasBtn").onclick = function(){
 };
 $("notasCerrar").onclick = function(){ $("notasPanel").classList.add("oculto"); };
 
-// Sellar la fase actual y avanzar a la siguiente
+// Sellar la fase actual y avanzar a la siguiente (un doble toque rapido
+// no puede provocar dos avances desde la misma fase)
+var ultimoAvanceDesde = -1;
 function siguiente(){
+  if (ultimoAvanceDesde === G.i) return;
+  ultimoAvanceDesde = G.i;
   if (G.i < NIVELES.length){
     G.done++;
     refrescaNotas();
@@ -559,139 +629,203 @@ screens.n1 = function(){
   setProg(faseTxt(1));
   G.i = 0;
   var opciones = pick([
-    { t:"Luis y Jaime", ok:true },
-    { t:"Lvis y Jaim", ok:false },
-    { t:"Luis y Jaume", ok:false },
-    { t:"Los dos camareros", ok:false }
+    { t:"Luis y Jaime" },
+    { t:"Jaime" },
+    { t:"Luis" },
+    { t:"Ninguno", ok:true }
   ], 4);
   app.innerHTML =
     '<div class="card anim-in">' +
-      '<h2>Fase 1 · ¿Quién está de cumple?</h2>' +
-      '<p class="mut">Empieza suave. Elige la opción correcta y el portal te deja seguir.</p>' +
+      '<h2>Fase 1 · ¿De quién es el cumpleaños?</h2>' +
+      '<p class="mut">Verificación de acceso a la red Wi-Fi de la finca.</p>' +
       '<div id="opts"></div>' +
+      '<p class="small" id="err1" style="color:var(--bad); margin-top:12px; min-height:18px"></p>' +
     '</div>';
   var box = $("opts");
+  var ya = false;
   opciones.forEach(function(o){
     var b = document.createElement("button");
     b.type = "button"; b.className = "btn"; b.textContent = o.t;
     b.onclick = function(){
-      if (o.ok){ b.className = "btn ok"; setTimeout(siguiente, 500); }
+      if (o.ok){
+        if (ya) return; ya = true;
+        b.className = "btn ok"; setTimeout(siguiente, 500);
+      }
       else {
         b.style.borderColor = "var(--bad)";
+        $("err1").textContent = "Error 403: No das una. ¿Has venido a la fiesta a gorronear red sin saber ni de quién es el cumpleaños? Habla con la gente o vete a casa.";
         app.classList.remove("shake"); void app.offsetWidth; app.classList.add("shake");
-        toast("¿Seguro? Mira el grupo de WhatsApp.");
       }
     };
     box.appendChild(b);
   });
 };
 
-/* ================= N2: captcha inhumano ================= */
+/* ================= N2: rondas de fotos ================= */
 screens.n2 = function(){
   setProg(faseTxt(2));
   G.i = 1;
-  var celdas = [
-    ["\u{1F382}","\u{1F973}"],["\u{1F382}","\u{1F37A}"],["\u{1F973}","\u{1F381}"],["\u{1F37A}","\u{1F382}"],
-    ["\u{1F382}","\u{1F973}"],["\u{1F370}","\u{1F973}"],["\u{1F973}","\u{1F37A}"],["\u{1F382}","\u{1F973}"],
-    ["\u{1F370}","\u{1F389}"],["\u{1F382}","\u{1F388}"],["\u{1F57A}","\u{1F973}"],["\u{1F973}","\u{1F3B6}"]
-  ];
-  var fallos = 0;
-  var sel = {};
-  app.innerHTML =
-    '<div class="card anim-in" id="cap">' +
-      '<h2>Fase 2 · Verifica que no eres un robot</h2>' +
-      '<p class="mut small">Selecciona todas las casillas que contengan <b>\u{1F382} junto a \u{1F973}</b>. Las que tengan solo uno de los dos no valen.</p>' +
+  var r = 0, fallos = 0, rondaOk = false;
+  app.innerHTML = '<div class="card anim-in" id="cap"><div id="f2body"></div></div>';
+
+  function avanzar(){
+    if (rondaOk) return;
+    rondaOk = true;
+    setTimeout(function(){
+      if (r >= FOTOS.length) siguiente();
+      else mostrar();
+    }, 450);
+  }
+
+  function mostrar(){
+    rondaOk = false;
+    var ronda = FOTOS[r];
+    var celdas = pick(ronda.celdas, ronda.celdas.length);
+    var sel = {};
+    $("f2body").innerHTML =
+      '<h2>Fase 2 · Ronda ' + (r+1) + '/' + FOTOS.length + ' · Selección visual</h2>' +
+      '<p class="mut small">' + esc(ronda.consigna) + '</p>' +
       '<div class="grid" id="grid"></div>' +
       '<button class="btn pri" id="ok" type="button">Verificar</button>' +
-    '</div>';
-  var grid = $("grid");
-  celdas.forEach(function(c, i){
-    var d = document.createElement("div");
-    d.className = "cell"; d.setAttribute("role","checkbox"); d.setAttribute("aria-checked","false");
-    d.dataset.ok = (c.indexOf("\u{1F382}")>=0 && c.indexOf("\u{1F973}")>=0) ? "1" : "0";
-    d.textContent = c.join(" ");
-    d.onclick = function(){
-      sel[i] = !sel[i];
-      d.className = "cell" + (sel[i] ? " sel" : "");
-      d.setAttribute("aria-checked", sel[i] ? "true" : "false");
+      '<p class="mut small" id="f2msg" style="margin-top:10px; min-height:18px"></p>';
+    var grid = $("grid");
+    celdas.forEach(function(c, i){
+      var d = document.createElement("div");
+      d.className = "cell foto"; d.setAttribute("role","checkbox"); d.setAttribute("aria-checked","false");
+      d.dataset.ok = c.ok ? "1" : "0";
+      var img = document.createElement("img");
+      img.src = c.u; img.alt = "foto"; img.loading = "lazy"; img.decoding = "async";
+      img.onerror = function(){
+        d.innerHTML = '<div class="fallback">\u{1F4F7}</div>';
+        toast("Una foto no ha cargado. Recarga la página si vuelve a pasar.", 3500);
+      };
+      d.appendChild(img);
+      d.onclick = function(){
+        sel[i] = !sel[i];
+        d.className = "cell foto" + (sel[i] ? " sel" : "");
+        d.setAttribute("aria-checked", sel[i] ? "true" : "false");
+      };
+      grid.appendChild(d);
+    });
+    $("ok").onclick = function(){
+      if (rondaOk) return;
+      var totalOk = celdas.filter(function(c){ return c.ok; }).length;
+      var marcadas = Object.keys(sel).filter(function(k){ return sel[k]; });
+      if (marcadas.length === totalOk && marcadas.every(function(k){ return celdas[+k].ok; })){
+        grid.querySelectorAll(".cell").forEach(function(c){ if (c.dataset.ok === "1") c.style.borderColor = "var(--good)"; });
+        r++;
+        avanzar();
+        return;
+      }
+      fallos++;
+      var card = $("cap");
+      card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+      var msgs = ["Esa no es. Ni de broma.","Estás seleccionando como Jaime elige restaurante.","¿Ves la diferencia o te lo dibujo?","Luis tampoco distingue y hoy es su cumple."];
+      if (fallos === 2) toast("Pista: hay " + celdas.filter(function(c){ return c.ok; }).length + " correctas, y ninguna más.", 3200);
+      else if (fallos >= 3){ toast("El portal se apiada. Pasas a la siguiente ronda.", 2600); r++; avanzar(); }
+      else toast(msgs[rnd(msgs.length)], 2600);
     };
-    grid.appendChild(d);
-  });
-  function esValida(k){ return celdas[k].indexOf("\u{1F382}")>=0 && celdas[k].indexOf("\u{1F973}")>=0; }
-  $("ok").onclick = function(){
-    var marcadas = Object.keys(sel).filter(function(k){ return sel[k]; });
-    if (marcadas.length === 3 && marcadas.every(esValida)){
-      grid.querySelectorAll(".cell").forEach(function(c){ c.classList.add("good"); if (c.dataset.ok === "1") c.style.borderColor = "var(--good)"; });
-      setTimeout(siguiente, 500);
-      return;
-    }
-    fallos++;
-    var card = $("cap");
-    card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
-    var msgs = ["Eso no es un pastel, es una empanada disfrazada.","Ni Google aprobaría este captcha.","Estás seleccionando como Jaime elige restaurante: mal.","Luis tampoco distingue un \u{1F382} de una \u{1F973} y hoy es su cumpleaños."];
-    if (fallos === 2) toast("Pista: son tres, y parecen una fiesta de verdad (\u{1F382} + \u{1F973}).", 3200);
-    else if (fallos >= 3){ toast("El captcha se apiada de ti. Pasas.", 3000); setTimeout(siguiente, 1300); }
-    else toast(msgs[rnd(msgs.length)], 3000);
-  };
-};
-
-/* ================= N3: verdadero/mentira ================= */
-screens.n3 = function(){
-  setProg(faseTxt(3));
-  G.i = 2;
-  var lista = pick(PREGUNTAS.vf, 3);
-  var idx = 0;
-  app.innerHTML =
-    '<div class="card anim-in" id="vf">' +
-      '<h2>Fase 3 · ¿Verdad o mentira?</h2>' +
-      '<p class="mut small">Sobre ' + esc(CFG.cumpleaneros) + '. Solo los amigos de verdad aprueban.</p>' +
-      '<div id="vbody"></div>' +
-    '</div>';
-  function mostrar(){
-    if (idx >= lista.length){ setTimeout(siguiente, 600); return; }
-    var q = lista[idx];
-    $("vbody").innerHTML =
-      '<p><b>' + (idx+1) + '/' + lista.length + '.</b> ' + esc(q.t) + '</p>' +
-      '<div class="opts">' +
-        '<button class="btn ok" id="bv" type="button">Verdad</button>' +
-        '<button class="btn" id="bf" type="button">Mentira</button>' +
-      '</div>' +
-      '<p class="mut small" id="vfb" style="margin-top:12px"></p>';
-    function resp(val, btn){
-      var ok = (val === q.ok);
-      $("bv").disabled = true; $("bf").disabled = true;
-      btn.className = "btn" + (ok ? " ok" : "");
-      btn.style.borderColor = ok ? "var(--good)" : "var(--bad)";
-      var other = $(val ? "bf" : "bv");
-      if (other) other.className = ok ? "btn ghost" : "btn ok";
-      $("vfb").textContent = (ok ? "✔ " : "✘ ") + q.why;
-      setTimeout(function(){ idx++; mostrar(); }, 2100);
-    }
-    $("bv").onclick = function(){ resp(true, this); };
-    $("bf").onclick = function(){ resp(false, this); };
   }
   mostrar();
 };
 
-/* ================= N4: ordena la frase ================= */
+/* ================= N3: cuestionario fijo ================= */
+screens.n3 = function(){
+  setProg(faseTxt(3));
+  G.i = 2;
+  var lista = PREGUNTAS.fase3;
+  var idx = 0;
+  app.innerHTML =
+    '<div class="card anim-in" id="f3">' +
+      '<h2>Fase 3 · Cuestionario de admisión</h2>' +
+      '<p class="mut small">Tres preguntas. Si fallas, insistes. Sin salida por la puerta de atrás.</p>' +
+      '<div id="f3body"></div>' +
+    '</div>';
+  function mostrar(){
+    if (idx >= lista.length){ setTimeout(siguiente, 500); return; }
+    var q = lista[idx];
+    var marca = [];
+    var ya = false;
+    $("f3body").innerHTML =
+      '<p><b>' + (idx+1) + '/3.</b> ' + esc(q.q) + '</p>' +
+      '<div id="f3opts"></div>' +
+      (q.tipo === "multi" ? '<button class="btn pri" id="f3ok" type="button">Comprobar</button>' : "") +
+      '<p class="small" id="f3msg" style="margin-top:10px; min-height:18px"></p>';
+    var box = $("f3opts");
+    q.opciones.forEach(function(t, i){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "btn"; b.dataset.i = i; b.textContent = t;
+      b.onclick = function(){
+        if (q.tipo === "single"){
+          Array.prototype.forEach.call(box.children, function(x){ x.className = "btn"; x.dataset.on = ""; });
+          b.className = "btn"; b.style.borderColor = "var(--acc)"; b.dataset.on = "1";
+          comprobar(i);
+        } else {
+          marca[i] = !marca[i];
+          b.className = "btn" + (marca[i] ? " sel" : "");
+          b.style.borderColor = marca[i] ? "var(--acc)" : "";
+        }
+      };
+      box.appendChild(b);
+    });
+    function comprobar(elegida){
+      var cont = 0;
+      for (var k in marca) if (marca[k]) cont++;
+      var correcta = q.tipo === "multi"
+        ? (cont === q.correctas.length && q.correctas.every(function(c){ return marca[c]; }))
+        : (elegida === q.correcta);
+      if (correcta){
+        if (ya) return;
+        ya = true;
+        if (q.tipo === "multi"){
+          q.correctas.forEach(function(c){ box.children[c].className = "btn ok"; });
+        } else {
+          box.children[q.correcta].className = "btn ok";
+        }
+        $("f3msg").textContent = "✔ Correcto.";
+        $("f3msg").style.color = "var(--good)";
+        setTimeout(function(){ idx++; mostrar(); }, 1400);
+      } else {
+        $("f3msg").textContent = q.error;
+        $("f3msg").style.color = "var(--bad)";
+        var card = $("f3");
+        card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+        if (q.tipo === "multi"){
+          marca = [];
+          Array.prototype.forEach.call(box.children, function(x){ x.className = "btn"; x.style.borderColor = ""; });
+        }
+      }
+    }
+    if (q.tipo === "multi"){
+      $("f3ok").onclick = function(){ comprobar(-1); };
+    }
+  }
+  mostrar();
+};
+
+/* ================= N4: burbujas de WhatsApp ================= */
 screens.n4 = function(){
   setProg(faseTxt(4));
   G.i = 3;
-  var frases = pick(CFG.frases, 2);
+  var frases = pick(CFG.frasesWhatsapp, 3);
   var idx = 0;
   app.innerHTML =
     '<div class="card anim-in" id="of">' +
-      '<h2>Fase 4 · Reconstruye la frase</h2>' +
-      '<p class="mut small">Pulsa las palabras en el orden correcto. Si fallas, vuelven a su sitio.</p>' +
+      '<h2>Fase 4 · El grupo de Los Mejores</h2>' +
+      '<p class="mut small">Reconstruye el mensaje pulsando las palabras en orden. Si aciertas, sabrás quién lo escribió.</p>' +
       '<div id="ofbody"></div>' +
     '</div>';
   function mostrar(){
-    var palabras = frases[idx].split(" ");
+    var frase = frases[idx];
+    var palabras = frase.texto.split(" ");
     var total = palabras.length;
     var puestas = [];
     $("ofbody").innerHTML =
-      '<p><b>' + (idx+1) + '/2.</b></p>' +
-      '<div class="construida" id="const"></div>' +
+      '<div class="wa-wrap">' +
+        '<div class="wa-head"><div class="av">👥</div><div><b>Los Mejores</b><br><span>en línea</span></div></div>' +
+        '<div class="burbuja" id="const"></div>' +
+        '<div class="wa-meta oculto" id="wameta"></div>' +
+      '</div>' +
       '<div id="chips"></div>';
     var mezcla = pick(palabras.map(function(p, i){ return {p:p, i:i}; }), total);
     var chips = $("chips");
@@ -703,7 +837,7 @@ screens.n4 = function(){
         c.disabled = true;
         puestas.push(w.i);
         var s = document.createElement("span");
-        s.className = "chip placed"; s.textContent = w.p;
+        s.className = "chip placed wa"; s.textContent = w.p;
         $("const").appendChild(s);
         if (puestas.length === total) comprobar();
       };
@@ -712,15 +846,18 @@ screens.n4 = function(){
     function comprobar(){
       var ok = puestas.every(function(v, k){ return v === k; });
       if (ok){
-        $("const").style.borderColor = "var(--good)";
+        var meta = $("wameta");
+        meta.classList.remove("oculto");
+        meta.innerHTML = '— <b>' + esc(frase.autor) + '</b> ✅✅' +
+          (frase.sub ? '<span class="sub">' + esc(frase.sub) + '</span>' : "");
         setTimeout(function(){
           idx++;
           if (idx >= frases.length) siguiente(); else mostrar();
-        }, 500);
+        }, 2200);
       } else {
         var c = $("const");
         c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
-        toast("Esa frase no la ha dicho nadie nunca.", 2200);
+        toast("Ese mensaje no lo escribió nadie. O sí, pero borracho.", 2200);
         setTimeout(mostrar, 900);
       }
     }
@@ -733,10 +870,10 @@ screens.n5 = function(){
   G.i = 4;
   simonRun({
     rondas: 4, base: 3,
-    titulo: "Fase 5 · Memoria de después de la tercera",
-    sub: "Repite la secuencia. Como el wifi de la finca: si falla, se corta y vuelta a empezar.",
+    titulo: "Fase 5 · Test de Reflejos de Resaca",
+    sub: "🥃 Garrafón · 🥙 Kebab de dudosa procedencia · 💊 Paracetamol · 🤮 Arcada. Repite la secuencia. Como el wifi de la finca: si falla, se corta y vuelta a empezar.",
     onWin: siguiente,
-    onFail: function(){ rendicion("Tus neuronas han pedido un descanso. Concedido."); }
+    onFail: function(){ rendicion("Reflejos de pensionista un domingo por la mañana. Con ese pulso no te dejan ni sujetar un vaso de plástico."); }
   });
 };
 
@@ -744,37 +881,44 @@ screens.n5 = function(){
 screens.n6 = function(){
   setProg(faseTxt(6));
   G.i = 5;
-  var intentos = 0, rindio = false;
+  var intentos = 0, rindio = false, ya = false;
   app.innerHTML =
     '<div class="card anim-in" id="hu">' +
-      '<h2>Fase 6 · Pulsa el botón</h2>' +
-      '<p class="mut small">Sí, ese. El de abajo. Bueno, el que puedas. Se mueve más que Jaime un sábado.</p>' +
+      '<h2>Fase 6 · Cobrar el Bizum al rata del grupo</h2>' +
+      '<p class="mut small">Reclámale los 3,50 € de la cena. El botón esquiva con las excusas de siempre.</p>' +
       '<div class="huir" id="huir">' +
-        '<button class="btn pri" id="huye" type="button">CONÉCTATE AQUÍ</button>' +
+        '<button class="btn pri" id="huye" type="button">Reclamar 3,50 € de la cena</button>' +
       '</div>' +
       '<p class="mut small" id="hmsg" style="text-align:center;min-height:20px"></p>' +
     '</div>';
   var zona = $("huir"), btn = $("huye"), msg = $("hmsg");
+  var excusas = [
+    "No me va la app del banco",
+    "Mañana te lo hago sin falta",
+    "¿Pero eso no iba a fondo común?",
+    "Me he quedado sin cobertura",
+    "Te pago la siguiente ronda y quedamos en paz"
+  ];
   function mover(){
     if (rindio) return;
     intentos++;
-    var w = zona.clientWidth, h = zona.clientHeight, bw = Math.min(160, w - 24), bh = 52;
+    var w = zona.clientWidth, h = zona.clientHeight, bw = Math.min(170, w - 24), bh = 52;
     if (w < bw + 24) { bw = w - 24; }
     var x = 12 + Math.random() * Math.max(1, (w - bw - 24));
     var y = 12 + Math.random() * Math.max(1, (h - bh - 24));
     btn.style.left = x + "px"; btn.style.top = y + "px"; btn.style.transform = "none";
     if (intentos < 5){
-      var frases = ["¡Ese no!", "Casi…", "Como esquivar a un comercial en el mercadillo.", "Estás a un dedo de conseguirlo."];
-      msg.textContent = frases[Math.min(intentos - 1, frases.length - 1)];
+      btn.textContent = excusas[Math.min(intentos - 1, excusas.length - 1)];
+      msg.textContent = "Esquiva " + intentos + "/5";
     } else {
       rindio = true;
-      msg.textContent = "Vale, me rindo. Llevaba años huyendo de ti. Púlsame.";
-      btn.textContent = "Vale, me rindo";
+      msg.textContent = "Vale, te los pago… pero que se enteré yo de que me has acorralado.";
+      btn.textContent = "Vale, mira, 3,50 €";
     }
   }
   btn.addEventListener("pointerenter", function(){ if (!rindio) mover(); });
   btn.addEventListener("pointerdown", function(e){ if (!rindio){ e.preventDefault(); mover(); } });
-  btn.addEventListener("click", function(){ if (rindio) siguiente(); });
+  btn.addEventListener("click", function(){ if (rindio && !ya){ ya = true; siguiente(); } });
 };
 
 /* ================= N7: teclado bochinche ================= */
@@ -797,8 +941,8 @@ screens.n7 = function(){
 
   app.innerHTML =
     '<div class="card anim-in" id="tb">' +
-      '<h2>Fase 7 · El teclado bochinche</h2>' +
-      '<p class="mut small">Escribe: <b id="objetivo" class="mono">' + esc(frase) + '</b>. Ojo: las teclas se recolocan cada 3 letras.</p>' +
+      '<h2>Fase 7 · Mandar un mensaje coherente a las 05:42</h2>' +
+      '<p class="mut small">Escribe el mensaje de madrugada: <b id="objetivo" class="mono">' + esc(frase) + '</b>. Ojo: el teclado se recoloca cada 3 letras, como tus dedos a esas horas.</p>' +
       '<div class="escrito" id="escrito"></div>' +
       '<div class="teclado" id="teclado"></div>' +
       '<button class="btn pri oculto" id="trucoBtn" type="button" style="margin-top:12px">⏭ Saltar fase (tú sabes por qué)</button>' +
@@ -863,8 +1007,8 @@ screens.n8 = function(){
 
   app.innerHTML =
     '<div class="card anim-in" id="ml" data-score="0" data-errores="0">' +
-      '<h2>Fase 8 · El mentiroso</h2>' +
-      '<p class="mut small">Toca solo cuando salga <b>\u{1F973}</b>. Si sale <b>\u{1F389}</b>, NO toques: miente. Diez aciertos y pasas. Cada fallo reinicia la ronda.</p>' +
+      '<h2>Fase 8 · Detector de Alopecia y Falsas Melenas</h2>' +
+      '<p class="mut small">Toca solo cuando veas melena natural abundante (\u{1F468}\u{1F9B1}). Si sale entrada disimulada (\u{1F9E2}), abuelo power (\u{1F474}) o vuelo a Estambul (✈️), NO toques: miente. Diez aciertos y pasas.</p>' +
       '<div class="holes" id="holes"></div>' +
       '<p class="small" id="mlmsg" style="text-align:center;min-height:20px"></p>' +
     '</div>';
@@ -915,7 +1059,7 @@ screens.n8 = function(){
     var bueno = Math.random() < 0.68;
     h.dataset.tipo = bueno ? "bueno" : "malo";
     h.classList.add("pop");
-    h.innerHTML = bueno ? "\u{1F973}" : "\u{1F389}";
+    h.innerHTML = bueno ? "\u{1F468}\u{1F9B1}" : ["\u{1F9E2}","\u{1F474}","✈️"][rnd(3)];
     clearTimeout(h._t);
     h._t = setTimeout(function(){ ocultar(h); }, Math.max(780, 1150 - score * 45));
     timer = setTimeout(pop, Math.max(620, 1200 - score * 55));
@@ -927,27 +1071,34 @@ screens.n8 = function(){
 screens.n9 = function(){
   setProg(faseTxt(9));
   G.i = 8;
-  var n = 0;
+  var n = 0, ya = false;
   app.innerHTML =
     '<div class="card anim-in" id="tc9" data-n="0">' +
-      '<h2>Fase 9 · Sin contar</h2>' +
-      '<p class="mut small">Pulsa el botón grande <b>exactamente 10 veces</b>. No hay contador. Luego pulsa LISTO. Sabrás si te pasaste… o no.</p>' +
-      '<button class="btn pri tapgrande" id="tap10" type="button">TOCA</button>' +
+      '<h2>Fase 9 · Echar el chorro de alcohol a ojo</h2>' +
+      '<p class="mut small">Pulsa el botón grande <b>exactamente 10 veces</b> y dale a LISTO. Sin contar, como en la barra.</p>' +
+      '<button class="btn pri tapgrande" id="tap10" type="button">SIRVE</button>' +
       '<button class="btn" id="listo9" type="button">LISTO</button>' +
       '<p class="mut small" id="tc9msg" style="text-align:center;min-height:20px;margin-top:10px"></p>' +
     '</div>';
   $("tap10").onclick = function(){
+    if (ya) return;
     n++;
     $("tc9").dataset.n = String(n);
   };
   $("listo9").onclick = function(){
     if (n === 10){
+      if (ya) return;
+      ya = true;
       $("tc9msg").textContent = "¡Exacto! Diez. Ni nueve ni once.";
       setTimeout(siguiente, 600);
+    } else if (n === 9){
+      $("tc9msg").textContent = "Te has quedado corto. Tacaño hasta para servirte tú mismo.";
+      n = 0; $("tc9").dataset.n = "0";
+    } else if (n === 11){
+      $("tc9msg").textContent = "Te has pasado de frenada. Eso no es una copa, es un disolvente industrial. Vuelve a empezar.";
+      n = 0; $("tc9").dataset.n = "0";
     } else {
-      var m = (n === 9 || n === 11) ? "¡Casi! (ni idea de cómo, pero casi.)"
-            : (n < 9) ? "Te has quedado corto: " + n + "."
-            : "Te has pasado: " + n + ".";
+      var m = (n < 9) ? "Te has quedado corto: " + n + "." : "Te has pasado: " + n + ".";
       $("tc9msg").textContent = m + " Otra vez.";
       n = 0; $("tc9").dataset.n = "0";
     }
@@ -963,8 +1114,8 @@ screens.n10 = function(){
 
   app.innerHTML =
     '<div class="card anim-in" id="rx">' +
-      '<h2>Fase 10 · Reflejos</h2>' +
-      '<p class="mut small">Toca la caja <b>cuando se ponga verde</b>. Ni antes (fallo) ni muy después. Tres rondas, cada una más rápida.</p>' +
+      '<h2>Fase 10 · Salvar el cubata en la mesa coja</h2>' +
+      '<p class="mut small">Toca la pantalla <b>justo cuando el cubata se tambalee</b>, antes de que manche a todo el mundo. Ni antes ni muy después. Tres rondas, cada una más rápida.</p>' +
       '<div class="rbox" id="rbox" data-estado="espera" role="button" tabindex="0">ESPERA…</div>' +
       '<p class="mut small" id="rxmsg" style="text-align:center;min-height:20px;margin-top:10px"></p>' +
     '</div>';
@@ -1092,7 +1243,7 @@ screens.n13 = function(){
   setProg(faseTxt(13));
   G.i = 12;
   var clave = G.digits.slice(0, G.done).join("");
-  var escrito = "", fallos = 0;
+  var escrito = "", fallos = 0, ya = false;
 
   app.innerHTML =
     '<div class="card anim-in" id="cd">' +
@@ -1117,7 +1268,9 @@ screens.n13 = function(){
     var k = b.dataset.k;
     if (k === "__bs"){ escrito = escrito.slice(0, -1); pintar(); return; }
     if (k === "__ok"){
+      if (ya) return;
       if (escrito === clave){
+        ya = true;
         $("cdmsg").textContent = "Código correcto. Impresionante memoria.";
         setTimeout(siguiente, 600);
       } else {
@@ -1230,8 +1383,8 @@ screens.n16 = function(){
   var px = 0, py = 0, pasos = 0;
   app.innerHTML =
     '<div class="card anim-in" id="mz">' +
-      '<h2>Fase 16 · El laberinto</h2>' +
-      '<p class="mut small">Lleva el punto amarillo hasta la fiesta \u{1F389}. Usa las flechas. 60 movimientos y te apiadas.</p>' +
+      '<h2>Fase 16 · La retirada a tientas</h2>' +
+      '<p class="mut small">Guía al muñeco tambaleante (\u{1F6B6}) hasta su casa (\u{1F3E1}) esquivando controles \u{1F693}, esquinas traicioneras y bancos de iglesia \u26EA. Usa las flechas. 60 movimientos y te apiadan.</p>' +
       '<div class="maze" id="maze"></div>' +
       '<div class="dpad" id="dpad">' +
         '<span></span><button data-dir="up" type="button">↑</button><span></span>' +
@@ -1240,16 +1393,21 @@ screens.n16 = function(){
       '<p class="mut small" id="mzmsg" style="text-align:center;min-height:20px;margin-top:10px">Movimientos: 0</p>' +
     '</div>';
   function pintar(){
+    var obst = ["\u{1F693}", "\u26EA", "\u{1F4D0}"];
     var html = "";
+    var wi = 0;
     for (var y = 0; y < 5; y++){
       for (var x = 0; x < 5; x++){
         var cls = "celda";
         if (MAZE[y][x] === 1) cls += " muro";
         if (x === 4 && y === 4) cls += " meta";
         if (x === px && y === py) cls += " jugador";
+        var contenido = "";
+        if (x === px && y === py) contenido = "\u{1F6B6}";
+        else if (x === 4 && y === 4) contenido = "\u{1F3E1}";
+        else if (MAZE[y][x] === 1) contenido = obst[wi++ % obst.length];
         html += '<div class="' + cls + '" data-x="' + x + '" data-y="' + y + '" data-muro="' + MAZE[y][x] + '"' +
-                (x === 4 && y === 4 ? ' data-meta="1"' : "") + '>' +
-                (x === px && y === py ? "•" : (x === 4 && y === 4 ? "\u{1F389}" : "")) + '</div>';
+                (x === 4 && y === 4 ? ' data-meta="1"' : "") + '>' + contenido + '</div>';
       }
     }
     $("maze").innerHTML = html;
@@ -1402,7 +1560,7 @@ screens.diploma = function(){
       '<button class="btn pri" id="desc" type="button">📶 DESCARGAR CONTRASEÑA</button>' +
       '<button class="btn ghost" id="repetir" type="button">Pasarle la broma a otro amigo</button>' +
     '</div>';
-  $("desc").onclick = function(){ go("final"); };
+  $("desc").onclick = function(){ if (G.finalAbierto) return; G.finalAbierto = true; go("final"); };
   $("repetir").onclick = function(){ resetJuego(); };
 
   // easter egg: mantener pulsado el sello
