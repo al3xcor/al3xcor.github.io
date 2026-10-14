@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="es">
 <head>
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0e1116">
+<meta name="color-scheme" content="dark">
 <title>Finca Los Almendros · WiFi</title>
 <style>
   :root{
@@ -16,7 +16,7 @@
   body{
     background:var(--bg); color:var(--tx); min-height:100vh;
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    font-size:16px; line-height:1.45; padding:14px;
+    font-size:16px; line-height:1.45; padding:14px 14px 70px;
     display:flex; flex-direction:column; align-items:center;
   }
   .wrap{width:100%; max-width:520px}
@@ -45,7 +45,7 @@
   .btn.pri{background:var(--acc); border-color:var(--acc); color:#1a1300}
   .btn.ghost{background:transparent; color:var(--mut); font-weight:500; font-size:14px; min-height:44px}
   .btn.ok{background:var(--good); border-color:var(--good); color:#04160a}
-  .btn.rick{background:var(--rick); border-color:var(--rick); color:#fff}
+  .btn.bad{background:var(--bad); border-color:var(--bad); color:#1a0505}
   .btn[aria-disabled="true"]{opacity:.45; pointer-events:none}
   :focus-visible{outline:3px solid var(--acc); outline-offset:2px}
   input[type=text]{
@@ -61,7 +61,7 @@
   .bar{height:10px; background:#d9e0e8; border-radius:99px; overflow:hidden; margin:6px 0 10px}
   .bar i{display:block; height:100%; width:0%; background:linear-gradient(90deg,#1f5aa8,#4d9bff); border-radius:99px; transition:width .2s linear}
   .mcode{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; color:#5a6b7d; min-height:18px}
-  /* captcha */
+  /* grid emojis captcha */
   .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:6px 0 4px}
   .cell{
     aspect-ratio:1; border:2px solid var(--line); border-radius:12px; background:var(--panel2);
@@ -69,17 +69,61 @@
     cursor:pointer; user-select:none; padding:4px;
   }
   .cell.sel{border-color:var(--acc); background:#3a2f10}
-  .cell.bad{border-color:var(--bad)}
   .opts{display:flex; gap:10px; margin-top:10px}
   .opts .btn{flex:1}
+  /* chips ordenar frases */
+  .construida{min-height:50px;border:1px dashed var(--line);border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
+  .chip{padding:10px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);margin:3px;font-size:15px;cursor:pointer;color:var(--tx)}
+  .chip.placed{background:#3a2f10;border-color:var(--acc);cursor:default}
+  .chip:disabled{opacity:.5}
   /* simon */
   .pads{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0}
   .pad{aspect-ratio:1.3; border-radius:14px; border:2px solid var(--line); background:var(--panel2); font-size:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none}
   .pad.lit{filter:brightness(2.2)}
   .pad.good{border-color:var(--good)}
+  .pad.apagado{opacity:.07}
   /* boton huye */
   .huir{position:relative; height:220px; border-radius:14px; border:1px solid var(--line); background:#0b0e13; overflow:hidden; margin-top:8px}
-  .huir .btn{position:absolute; width:auto; min-width:140px; margin:0; left:50%; top:50%; transform:translate(-50%,-50%)}
+  .huir .btn{position:absolute; width:auto; min-width:150px; margin:0; left:50%; top:50%; transform:translate(-50%,-50%)}
+  /* teclado bochinche */
+  .escrito{min-height:44px;border:1px solid var(--line);border-radius:10px;background:#0b0e13;padding:8px 10px;font-size:20px;letter-spacing:.14em;font-family:ui-monospace,Menlo,Consolas,monospace;margin-bottom:10px}
+  .cursor{animation:blink 1s steps(1) infinite}
+  .teclado{display:grid; grid-template-columns:repeat(6,1fr); gap:7px}
+  .tecla{min-height:50px; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--tx); font-size:20px; font-weight:700; cursor:pointer; text-transform:uppercase}
+  .tecla:active{background:var(--acc); color:#1a1300}
+  .tecla.ancha{grid-column:span 6; font-size:15px; text-transform:none}
+  /* mentiroso */
+  .holes{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:10px 0}
+  .hole{aspect-ratio:1; border-radius:12px; background:var(--panel2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:clamp(26px,10vw,44px); cursor:pointer; user-select:none}
+  .hole.pop{border-color:var(--acc); background:#2a2410}
+  .hole.bien{animation:popbueno .3s ease}
+  .hole.mal{animation:popmal .3s ease}
+  /* sin contar */
+  .tapgrande{width:100%; min-height:130px; border-radius:18px; font-size:22px; font-weight:800}
+  /* reaccion */
+  .rbox{min-height:130px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; cursor:pointer; user-select:none; text-align:center; padding:10px}
+  .rbox[data-estado="espera"]{background:var(--panel2)}
+  .rbox[data-estado="verde"]{background:var(--good); color:#04160a}
+  .rbox[data-estado="fallo"]{background:var(--bad); color:#1a0505}
+  .rbox[data-estado="hecho"]{background:var(--panel2)}
+  /* teclado numerico */
+  .numk{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; max-width:280px; margin:10px auto 0}
+  .numk button{min-height:56px; font-size:22px; border-radius:12px; border:1px solid var(--line); background:var(--panel2); color:var(--tx); font-weight:700; cursor:pointer}
+  .numk button.ancha{grid-column:span 3; font-size:15px}
+  /* mastermind */
+  .slots{display:flex; gap:8px; justify-content:center; margin:10px 0}
+  .slot{width:54px; height:54px; border-radius:12px; border:2px dashed var(--line); display:flex; align-items:center; justify-content:center; font-size:26px}
+  .slot.on{border-style:solid; border-color:var(--acc)}
+  .fb{font-size:13px; color:var(--mut); border-top:1px solid var(--line); padding:6px 2px; display:flex; justify-content:space-between; gap:8px}
+  .fb b{color:var(--tx)}
+  /* laberinto */
+  .maze{display:grid; grid-template-columns:repeat(5,1fr); gap:4px; max-width:300px; margin:0 auto}
+  .celda{aspect-ratio:1; border-radius:8px; background:var(--panel2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:18px; user-select:none}
+  .celda.muro{background:#080b0f; border-color:#080b0f}
+  .celda.jugador{background:var(--acc); color:#1a1300; font-weight:800}
+  .celda.meta{background:#3a2f10; border-color:var(--acc)}
+  .dpad{display:grid; grid-template-columns:repeat(3,64px); gap:6px; justify-content:center; margin-top:12px}
+  .dpad button{min-height:52px; font-size:20px; border-radius:12px; border:1px solid var(--line); background:var(--panel2); color:var(--tx); cursor:pointer}
   /* diploma */
   .dip{border:3px double var(--acc); border-radius:14px; padding:18px; text-align:center; background:var(--panel2)}
   .dip .ttl{font-size:13px; letter-spacing:.18em; color:var(--acc); text-transform:uppercase}
@@ -95,16 +139,22 @@
   .ytplay{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:rgba(0,0,0,.35); color:#fff; font-weight:700; font-size:14px; padding:10px}
   .ytplay .tri{width:0;height:0;border-left:26px solid #fff;border-top:16px solid transparent;border-bottom:16px solid transparent}
   .ytbox iframe{width:100%; aspect-ratio:16/9; border:0; display:block}
-  .foot{display:flex; align-items:center; justify-content:center; gap:10px; color:var(--mut); font-size:11px; padding:6px 0 20px}
+  .foot{display:flex; align-items:center; justify-content:center; gap:10px; color:var(--mut); font-size:11px; padding:16px 0 20px}
   #reset{background:none;border:1px solid var(--line);color:var(--mut);border-radius:8px;font-size:11px;padding:4px 8px;cursor:pointer}
-  .toast{position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:var(--panel2); border:1px solid var(--line); color:var(--tx); padding:10px 16px; border-radius:99px; font-size:14px; z-index:60; max-width:92vw; text-align:center; box-shadow:0 6px 24px rgba(0,0,0,.5)}
+  .toast{position:fixed; left:50%; bottom:76px; transform:translateX(-50%); background:var(--panel2); border:1px solid var(--line); color:var(--tx); padding:10px 16px; border-radius:99px; font-size:14px; z-index:60; max-width:92vw; text-align:center; box-shadow:0 6px 24px rgba(0,0,0,.5)}
+  /* notas / sellos */
+  .notas-btn{position:fixed; right:12px; bottom:14px; z-index:40; background:var(--panel2); border:1px solid var(--line); color:var(--tx); border-radius:99px; padding:8px 14px; font-size:13px; cursor:pointer}
+  .notas-panel{position:fixed; left:12px; right:12px; bottom:62px; z-index:41; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; max-width:420px; margin:0 auto; box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  .oculto{display:none !important}
+  .dig{display:inline-block; min-width:32px; margin:3px; padding:6px 0; text-align:center; border-radius:8px; background:var(--panel2); border:1px solid var(--acc); font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:700}
   .anim-in{animation:in .25s ease}
   .shake{animation:shk .4s ease}
-  .pulse{animation:pl 1.2s ease infinite}
   @keyframes in{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
   @keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
-  @keyframes pl{0%,100%{opacity:1}50%{opacity:.55}}
   @keyframes sp{to{transform:rotate(360deg)}}
+  @keyframes blink{50%{opacity:0}}
+  @keyframes popbueno{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+  @keyframes popmal{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
   @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 </style>
 </head>
@@ -115,7 +165,22 @@
     <div class="prog" id="prog"></div>
   </header>
   <main id="app" aria-live="polite"></main>
-  <footer class="foot">Portal de invitados v2.1 · <button id="reset" type="button">empezar de cero</button></footer>
+  <footer class="foot">Portal de invitados v2.2 · <button id="reset" type="button">empezar de cero</button></footer>
+</div>
+<button class="notas-btn" id="notasBtn" type="button">📝 <span id="notasN">0</span>/16</button>
+<div class="notas-panel oculto" id="notasPanel">
+  <h2 style="margin-bottom:6px">Tus sellos</h2>
+  <p class="mut small" style="margin-bottom:8px">Cada fase superada te da un sello con un dígito. En la fase 13 te van a hacer falta <b>todos</b>.</p>
+  <div id="notasLista"></div>
+  <button class="btn ghost" id="notasCerrar" type="button">Cerrar</button>
+</div>
+<div class="notas-panel oculto" id="adminPanel">
+  <h2 style="margin-bottom:6px">🔓 Panel de administrador</h2>
+  <p class="mut small" style="margin-bottom:8px">Shhh. Nadie más sabe que esto existe.</p>
+  <button class="btn" id="admSkip" type="button">⏭ Saltar esta fase (con sello)</button>
+  <button class="btn" id="admCodigo" type="button">🔢 Ver el código de la fase 13</button>
+  <button class="btn" id="admExamen" type="button">🎓 Modo examen: siempre acierto</button>
+  <button class="btn ghost" id="admCerrar" type="button">Cerrar</button>
 </div>
 
 <script>
@@ -128,7 +193,13 @@
 var CFG = {
   finca: "Finca Los Almendros",
   red:   "Finca_Almendros_5G",
-  cumpleaneros: "Luis y Jaime"
+  cumpleaneros: "Luis y Jaime",
+  frasesTecleo: ["sincobertura", "felizcumple", "barralibre"],
+  palabraTruco: "truco",
+  frases: [
+    "ya estoy llegando dijo jaime sin moverse del sofa",
+    "esta vez invito yo dijeron los dos a la vez"
+  ]
 };
 
 var PREGUNTAS = {
@@ -141,13 +212,17 @@ var PREGUNTAS = {
     { t:"Ninguno de los dos ha llorado nunca viendo una serie.",
       ok:false, why:"Falso. Los dos lloraron. Y los dos lo negarán delante de sus amigos." },
     { t:"A Jaime le encanta madrugar los sábados para aprovechar el día.",
-      ok:false, why:"Falso. Los sábados se aprovechan desde el sofá, con luz natural." },
+      ok:false, why:"Falso. Los sábados se aprovechan desde el sofá, con luz natural." },
     { t:"Luis y Jaime discuten siempre de quién paga la ronda y los dos pierden.",
-      ok:true,  why:"Verdadero. La discusión se Resuelve pagando los dos. Siempre." },
+      ok:true,  why:"Verdadero. La discusión se resuelve pagando los dos. Siempre." },
     { t:"El grupo de WhatsApp donde se organizan los planes se llama 'Los Mejores'.",
-      ok:true,  why:"Verdadero. Y en ese grupo jamás se decide nada." }
+      ok:true,  why:"Verdadero. Y en ese grupo jamás se decide nada." },
+    { t:"Luis y Jaime han dicho 'este finde descansamos' más de diez veces este año.",
+      ok:true,  why:"Verdadero. El finde de descanso es una especie mitológica." },
+    { t:"A Jaime le da pereza hasta elegir qué ver en el sofá.",
+      ok:true,  why:"Verdadero. Puede tardar más en elegir película que la película en acabar." }
   ],
-  // Banco del examen final (se eligen 5 al azar)
+  // Banco del examen final (se eligen 10 al azar de 20)
   boss: [
     { q:"¿Qué pide Luis en el bar 'para probar'?",
       a:[{t:"Las croquetas de todos", ok:true},{t:"Una aceituna", ok:false},{t:"Agua del grifo", ok:false}],
@@ -184,28 +259,69 @@ var PREGUNTAS = {
       why:"Un plan no sale mal: sale 'versión beta'." },
     { q:"El grupo de WhatsApp de Luis y Jaime se llama:",
       a:[{t:"'Los Mejores'", ok:true},{t:"'Familia'", ok:false},{t:"'Vecinos'", ok:false}],
-      why:"Ahí se deciden todos los planes. O sea, ninguno." }
+      why:"Ahí se deciden todos los planes. O sea, ninguno." },
+    { q:"Si la nevera está vacía un sábado noche:",
+      a:[{t:"Piden lo de siempre, a la misma hora", ok:true},{t:"Cocinan algo sano", ok:false},{t:"Se van a dormir", ok:false}],
+      why:"El pedido de siempre a la misma hora es tradición sagrada." },
+    { q:"El plan perfecto según Luis:",
+      a:[{t:"Terracita y no hacer nada", ok:true},{t:"Senderismo al amanecer", ok:false},{t:"Museo y exposición", ok:false}],
+      why:"El no hacer nada, hecho con disciplina, es un arte." },
+    { q:"Jaime, técnicamente, es el que…",
+      a:[{t:"Siempre dice 'cinco minutos y bajamos'", ok:true},{t:"Llega el primero siempre", ok:false},{t:"Nunca pide postre", ok:false}],
+      why:"Los cinco minutos de Jaime son una unidad de tiempo propia." },
+    { q:"Lo que nunca falta en el coche de Luis:",
+      a:[{t:"Un cargador y un auxiliar roto", ok:true},{t:"Botiquín y triángulos", ok:false},{t:"Silencio absoluto", ok:false}],
+      why:"El cable siempre funciona y el auxiliar siempre falla." },
+    { q:"Su serie de refugción emocional es:",
+      a:[{t:"Una que ya se saben de memoria", ok:true},{t:"Un documental de tiburones", ok:false},{t:"Ninguna, leen libros", ok:false}],
+      why:"Revisionar por enésima vez da paz interior." },
+    { q:"A la hora de pagar la cuenta:",
+      a:[{t:"Sacar la calculadora del móvil", ok:true},{t:"Uno paga y punto", ok:false},{t:"Pagar a medias nunca", ok:false}],
+      why:"La calculadora aparece hasta con cinco comensales." },
+    { q:"Lo más parecido a un deporte que hacen juntos:",
+      a:[{t:"Caminar al bar con prisa", ok:true},{t:"Pádel los viernes", ok:false},{t:"Natación sincronizada", ok:false}],
+      why:"Y solo si el bar está cerca." },
+    { q:"Cuando alguien propone 'un plan tranquilo':",
+      a:[{t:"Nadie se lo cree", ok:true},{t:"Acaban en casa a las diez", ok:false},{t:"Se va a dormir la siesta", ok:false}],
+      why:"Un plan tranquilo, en este grupo, es ciencia ficción." }
   ]
 };
-
 /* ======================================================================
    ====== FIN EDITA AQUÍ ==================================================
    ====================================================================== */
 
 var YT_ID = "dQw4w9WgXcQ"; // rickroll
+var NUM = ["cero","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve","diez"];
+var EMO_MASTER = ["\u{1F37A}","\u{1F382}","\u{1F973}","\u{1F3B5}","\u{1F355}","\u{1F381}"]; // cerveza pastel fiesta musica pizza regalo
+var MAZE = [
+  [0,1,0,0,0],
+  [0,1,0,1,0],
+  [0,0,0,1,0],
+  [1,1,0,0,0],
+  [0,0,0,1,0]
+];
+var MAZE2 = [
+  [0,0,0,1,0],
+  [1,1,0,1,0],
+  [0,0,0,0,0],
+  [0,1,1,1,1],
+  [0,0,0,0,0]
+];
+var PADS_EMO = ["\u{1F37A}","\u{1F382}","\u{1F973}","\u{1F3B5}"];
+var PADS_COL = ["#1f5aa8","#a8441f","#1f8a4d","#8a1f8a"];
+
 var app = document.getElementById("app");
 var progEl = document.getElementById("prog");
-var G = { nombre:"", nivel:0 };
+var NIVELES = ["n1","n2","n3","n4","n5","n6","n7","n8","n9","n10","n11","n12","n13","n14","n15","n16"];
+var TOTAL_FASES = NIVELES.length + 1;
+var G = nuevoEstado();
 var toastTimer = null;
 
-var ERRORES_CAPTCHA = [
-  "Eso no es un pastel, es una empanada disfrazada.",
-  "Ni Google aprobaría este captcha.",
-  "Estás seleccionando como Jaime elige restaurante: mal.",
-  "Luis tampoco distingue un 🎂 de una 🥳 y hoy es su cumpleaños.",
-  "¿Seguro? Hasta el router está decepcionado."
-];
-
+function nuevoEstado(){
+  var digits = [];
+  for (var i=0;i<16;i++) digits.push(String(rnd(10)));
+  return { nombre:"", i:0, digits:digits, done:0, examenAyuda:false };
+}
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 function rnd(n){ return Math.floor(Math.random()*n); }
@@ -219,10 +335,140 @@ function toast(msg, ms){
 }
 function setProg(txt){ progEl.textContent = txt; }
 function go(screen){ render(screen); window.scrollTo(0,0); }
+function faseTxt(n){ return "Fase " + n + " / " + TOTAL_FASES; }
 
-/* ---------- pantallas ---------- */
+function refrescaNotas(){
+  $("notasN").textContent = String(G.done);
+  if (!$("notasPanel").classList.contains("oculto")){
+    var s = "";
+    for (var i=0;i<G.done;i++) s += '<span class="dig">' + G.digits[i] + '</span>';
+    $("notasLista").innerHTML = s || '<span class="mut small">Aún no tienes sellos. Cuando pases una fase, aparecerá su dígito aquí.</span>';
+  }
+}
+$("notasBtn").onclick = function(){
+  $("notasPanel").classList.toggle("oculto");
+  refrescaNotas();
+};
+$("notasCerrar").onclick = function(){ $("notasPanel").classList.add("oculto"); };
+
+// Sellar la fase actual y avanzar a la siguiente
+function siguiente(){
+  if (G.i < NIVELES.length){
+    G.done++;
+    refrescaNotas();
+  }
+  G.i++;
+  if (G.i >= NIVELES.length) go("boss");
+  else go(NIVELES[G.i]);
+}
+
+// Salida digna cuando alguien se atasca: nadie se queda sin jugar
+function rendicion(motivo){
+  setProg(faseTxt(G.i + 1));
+  app.className = "anim-in";
+  app.innerHTML =
+    '<div class="card">' +
+      '<h1>El portal se apiada de ti</h1>' +
+      '<p class="mut">' + esc(motivo) + '</p>' +
+      '<p>Concedido el <b>sello de la lástima</b> (con su dígito, como los demás). Nadie tiene por qué enterarse.</p>' +
+      '<button class="btn pri" id="seguir" type="button">Aceptar mi derrota y seguir</button>' +
+    '</div>';
+  $("seguir").onclick = function(){ siguiente(); };
+}
 
 var screens = {};
+
+/* ================= motor de Simón (reutilizado por 3 niveles) ================= */
+function simonRun(o){
+  // o = {rondas, base, inverso, ciego, onWin, onFail}
+  var rondas = o.rondas, base = o.base;
+  var ronda = 0, fallos = 0, muerto = false;
+  var timers = [];
+  function limpia(){ timers.forEach(clearTimeout); timers = []; }
+  function en(ms, fn){ var t = setTimeout(fn, ms); timers.push(t); return t; }
+  function seguro(fn){ return function(){ if (muerto || !$("smsj")) return; fn(); }; }
+
+  app.className = "anim-in";
+  app.innerHTML =
+    '<div class="card" id="sim">' +
+      '<h2>' + esc(o.titulo) + '</h2>' +
+      '<p class="mut small">' + esc(o.sub) + '</p>' +
+      '<div class="pads" id="pads"></div>' +
+      '<p class="small" id="smsj" style="text-align:center;min-height:22px"></p>' +
+    '</div>';
+  setProg(faseTxt(G.i + 1));
+
+  var padEls = [];
+  var pads = $("pads");
+  PADS_EMO.forEach(function(e, i){
+    var p = document.createElement("div");
+    p.className = "pad"; p.textContent = e; p.setAttribute("role","button"); p.tabIndex = 0;
+    p.dataset.i = i;
+    pads.appendChild(p); padEls.push(p);
+  });
+
+  var sec = [], turno = 0, jugando = false;
+
+  function pulsar(i){
+    if (muerto) return;
+    var p = padEls[i];
+    if (!p || !p.classList) return;
+    p.classList.add("lit"); p.style.background = PADS_COL[i];
+    en(260, function(){ if (p.classList){ p.classList.remove("lit"); p.style.background = "var(--panel2)"; } });
+    if (jugando) comprobar(i);
+  }
+  padEls.forEach(function(p, i){
+    p.addEventListener("click", function(){ pulsar(i); });
+    p.addEventListener("keydown", function(ev){ if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); pulsar(i); } });
+  });
+
+  function nuevaRonda(){
+    if (muerto || !$("smsj")) return;
+    ronda++;
+    turno = 0; jugando = false;
+    sec = [];
+    for (var i = 0; i < base + ronda - 1; i++) sec.push(rnd(4));
+    $("smsj").textContent = "Ronda " + ronda + "/" + rondas + " · mira la secuencia" + (o.inverso ? " (luego al revés)" : "") + "…";
+    if (o.ciego) padEls.forEach(function(p){ p.classList.remove("apagado"); });
+    var k = 0;
+    (function paso(){
+      if (muerto || !$("smsj")) return;
+      if (k >= sec.length){
+        jugando = true;
+        if (o.ciego) padEls.forEach(function(p){ p.classList.add("apagado"); });
+        $("smsj").textContent = o.inverso ? "¡Repítela AL REVÉS!" : "¡Repítela!";
+        return;
+      }
+      var n = sec[k++];
+      padEls[n].classList.add("lit"); padEls[n].style.background = PADS_COL[n];
+      en(430, function(){ padEls.forEach(function(p){ if (p.classList){ p.classList.remove("lit"); p.style.background = "var(--panel2)"; } }); });
+      en(620, paso);
+    })();
+  }
+
+  function comprobar(i){
+    var esperado = o.inverso ? sec[sec.length - 1 - turno] : sec[turno];
+    if (esperado === i){
+      turno++;
+      if (turno >= sec.length){
+        jugando = false;
+        $("smsj").textContent = "¡Correcto!";
+        if (ronda >= rondas){ limpia(); en(700, function(){ if (!muerto) o.onWin(); }); }
+        else en(1100, function(){ if (!muerto) nuevaRonda(); });
+      }
+    } else {
+      jugando = false;
+      fallos++;
+      limpia();
+      if (fallos >= 2){ o.onFail(); return; }
+      $("smsj").textContent = "Fallaste. Se corta la conexión. Repetimos ronda.";
+      en(1300, function(){ if (!muerto) nuevaRonda(); });
+    }
+  }
+  nuevaRonda();
+}
+
+/* ================= pantallas base ================= */
 
 screens.cebo = function(){
   setProg("");
@@ -260,8 +506,8 @@ screens.error = function(){
     '<div class="card">' +
       '<h1>Error 401</h1>' +
       '<p class="mono small mut">Código: RED_SIN_SALIDA · Soporte: recepción (cerrado por fiesta)</p>' +
-      '<p>La red <b>' + esc(CFG.red) + '</b> está protegida por un portal de invitados. Antes de darte la contraseña tendrás que superar <b>7 fases</b> de verificación.</p>' +
-      '<p class="mut small">Tranquilo: son solo unas preguntas sobre <b>' + esc(CFG.cumpleaneros) + '</b>. Si los conoces de verdad, esto está chupado. Si no, siempre puedes mirar el móvil de al lado.</p>' +
+      '<p>La red <b>' + esc(CFG.red) + '</b> está protegida por un portal de invitados. Antes de darte la contraseña tendrás que superar <b>' + TOTAL_FASES + ' fases</b> de verificación. Cada una más difícil. Algunas tienen truco.</p>' +
+      '<p class="mut small">Tranquilo: son solo unas preguntas y minijuegos sobre <b>' + esc(CFG.cumpleaneros) + '</b>. Si los conoces de verdad, esto está chupado. Si no, siempre puedes mirar el móvil de al lado.</p>' +
       '<button class="btn pri" id="verif" type="button">Verificar acceso</button>' +
     '</div>';
   $("verif").onclick = function(){ go("intro"); };
@@ -275,28 +521,49 @@ screens.intro = function(){
       '<p class="mut">Identifícate para que luego el diploma tenga tu nombre. Puedes poner el real, el del grupo de WhatsApp o el que te dieron al nacer.</p>' +
       '<input type="text" id="nom" maxlength="24" placeholder="Tu nombre" autocomplete="off">' +
       '<button class="btn pri" id="go" type="button">Comenzar verificación</button>' +
+      '<button class="btn ghost" id="notasAtajo" type="button">📝 Ver mis sellos</button>' +
     '</div>';
   var inp = $("nom"); setTimeout(function(){ inp.focus(); }, 60);
   function start(){
     var v = inp.value.trim().slice(0,24);
     G.nombre = v || "Invitado ilustre";
+    if (v.toLowerCase().replace(/\s+/g,"") === "admin"){ toast("El portal te reconoce, jefe. 🕵️", 3000); }
     go("n1");
   }
   $("go").onclick = start;
+  $("notasAtajo").onclick = function(){ $("notasPanel").classList.remove("oculto"); refrescaNotas(); };
   inp.addEventListener("keydown", function(e){ if (e.key === "Enter") start(); });
 };
 
-/* N1: identificacion */
+/* ================= easter egg: panel de administrador ================= */
+(function panelAdmin(){
+  var toques = 0, timer = null;
+  var brand = document.querySelector(".brand");
+  if (!brand) return;
+  brand.style.cursor = "pointer";
+  brand.addEventListener("click", function(){
+    toques++;
+    clearTimeout(timer);
+    timer = setTimeout(function(){ toques = 0; }, 1200);
+    if (toques === 3) toast("…");
+    if (toques >= 7){
+      toques = 0;
+      $("adminPanel").classList.toggle("oculto");
+      if (!$("adminPanel").classList.contains("oculto")) toast("Modo administrador activado", 2500);
+    }
+  });
+})();
+
+/* ================= N1: identificacion ================= */
 screens.n1 = function(){
-  setProg("Fase 1 / 7");
-  G.nivel = 1;
-  var opciones = [
+  setProg(faseTxt(1));
+  G.i = 0;
+  var opciones = pick([
     { t:"Luis y Jaime", ok:true },
     { t:"Lvis y Jaim", ok:false },
     { t:"Luis y Jaume", ok:false },
     { t:"Los dos camareros", ok:false }
-  ];
-  opciones = pick(opciones, 4);
+  ], 4);
   app.innerHTML =
     '<div class="card anim-in">' +
       '<h2>Fase 1 · ¿Quién está de cumple?</h2>' +
@@ -304,13 +571,13 @@ screens.n1 = function(){
       '<div id="opts"></div>' +
     '</div>';
   var box = $("opts");
-  opciones.forEach(function(o, idx){
+  opciones.forEach(function(o){
     var b = document.createElement("button");
     b.type = "button"; b.className = "btn"; b.textContent = o.t;
     b.onclick = function(){
-      if (o.ok){ b.className = "btn ok"; setTimeout(function(){ go("n2"); }, 500); }
+      if (o.ok){ b.className = "btn ok"; setTimeout(siguiente, 500); }
       else {
-        b.className = "btn"; b.style.borderColor = "var(--bad)";
+        b.style.borderColor = "var(--bad)";
         app.classList.remove("shake"); void app.offsetWidth; app.classList.add("shake");
         toast("¿Seguro? Mira el grupo de WhatsApp.");
       }
@@ -319,21 +586,21 @@ screens.n1 = function(){
   });
 };
 
-/* N2: captcha inhumano */
+/* ================= N2: captcha inhumano ================= */
 screens.n2 = function(){
-  setProg("Fase 2 / 7");
-  G.nivel = 2;
+  setProg(faseTxt(2));
+  G.i = 1;
   var celdas = [
-    ["🎂","🥳"],["🎂","🍺"],["🥳","🎁"],["🍺","🎂"],
-    ["🎂","🥳"],["🍰","🥳"],["🥳","🍺"],["🎂","🥳"],
-    ["🍰","🎉"],["🎂","🎈"],["🕺","🥳"],["🥳","🎶"]
+    ["\u{1F382}","\u{1F973}"],["\u{1F382}","\u{1F37A}"],["\u{1F973}","\u{1F381}"],["\u{1F37A}","\u{1F382}"],
+    ["\u{1F382}","\u{1F973}"],["\u{1F370}","\u{1F973}"],["\u{1F973}","\u{1F37A}"],["\u{1F382}","\u{1F973}"],
+    ["\u{1F370}","\u{1F389}"],["\u{1F382}","\u{1F388}"],["\u{1F57A}","\u{1F973}"],["\u{1F973}","\u{1F3B6}"]
   ];
   var fallos = 0;
   var sel = {};
   app.innerHTML =
     '<div class="card anim-in" id="cap">' +
       '<h2>Fase 2 · Verifica que no eres un robot</h2>' +
-      '<p class="mut small">Selecciona todas las casillas que contengan <b>🎂 junto a 🥳</b>. Las que tengan solo uno de los dos no valen.</p>' +
+      '<p class="mut small">Selecciona todas las casillas que contengan <b>\u{1F382} junto a \u{1F973}</b>. Las que tengan solo uno de los dos no valen.</p>' +
       '<div class="grid" id="grid"></div>' +
       '<button class="btn pri" id="ok" type="button">Verificar</button>' +
     '</div>';
@@ -341,8 +608,8 @@ screens.n2 = function(){
   celdas.forEach(function(c, i){
     var d = document.createElement("div");
     d.className = "cell"; d.setAttribute("role","checkbox"); d.setAttribute("aria-checked","false");
-    d.dataset.ok = (c.indexOf("🎂")>=0 && c.indexOf("🥳")>=0) ? "1" : "0";
-    d.innerHTML = c.map(esc).join("");
+    d.dataset.ok = (c.indexOf("\u{1F382}")>=0 && c.indexOf("\u{1F973}")>=0) ? "1" : "0";
+    d.textContent = c.join(" ");
     d.onclick = function(){
       sel[i] = !sel[i];
       d.className = "cell" + (sel[i] ? " sel" : "");
@@ -350,34 +617,30 @@ screens.n2 = function(){
     };
     grid.appendChild(d);
   });
+  function esValida(k){ return celdas[k].indexOf("\u{1F382}")>=0 && celdas[k].indexOf("\u{1F973}")>=0; }
   $("ok").onclick = function(){
     var marcadas = Object.keys(sel).filter(function(k){ return sel[k]; });
-    var esValida = function(k){ return celdas[k].indexOf("🎂")>=0 && celdas[k].indexOf("🥳")>=0; };
-    var bien = marcadas.every(esValida);
-    var todas = marcadas.filter(esValida).length;
-    if (bien && marcadas.length === 3 && todas === 3){
-      grid.querySelectorAll(".cell").forEach(function(c){ c.classList.add("good"); });
-      setTimeout(function(){ go("n3"); }, 450);
+    if (marcadas.length === 3 && marcadas.every(esValida)){
+      grid.querySelectorAll(".cell").forEach(function(c){ c.classList.add("good"); if (c.dataset.ok === "1") c.style.borderColor = "var(--good)"; });
+      setTimeout(siguiente, 500);
       return;
     }
     fallos++;
     var card = $("cap");
     card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
-    var msg;
-    if (fallos === 2) msg = "Pista: son tres, y son las que parecen una fiesta de verdad (🎂 + 🥳).";
-    else if (fallos >= 3) msg = "El captcha se apiada de ti. Pasas. No se lo digas a nadie.";
-    else msg = ERRORES_CAPTCHA[rnd(ERRORES_CAPTCHA.length)];
-    toast(msg, 3000);
-    if (fallos >= 3) setTimeout(function(){ go("n3"); }, 1400);
+    var msgs = ["Eso no es un pastel, es una empanada disfrazada.","Ni Google aprobaría este captcha.","Estás seleccionando como Jaime elige restaurante: mal.","Luis tampoco distingue un \u{1F382} de una \u{1F973} y hoy es su cumpleaños."];
+    if (fallos === 2) toast("Pista: son tres, y parecen una fiesta de verdad (\u{1F382} + \u{1F973}).", 3200);
+    else if (fallos >= 3){ toast("El captcha se apiada de ti. Pasas.", 3000); setTimeout(siguiente, 1300); }
+    else toast(msgs[rnd(msgs.length)], 3000);
   };
 };
 
-/* N3: verdadero/falso */
+/* ================= N3: verdadero/mentira ================= */
 screens.n3 = function(){
-  setProg("Fase 3 / 7");
-  G.nivel = 3;
+  setProg(faseTxt(3));
+  G.i = 2;
   var lista = pick(PREGUNTAS.vf, 3);
-  var idx = 0, aciertos = 0;
+  var idx = 0;
   app.innerHTML =
     '<div class="card anim-in" id="vf">' +
       '<h2>Fase 3 · ¿Verdad o mentira?</h2>' +
@@ -385,13 +648,7 @@ screens.n3 = function(){
       '<div id="vbody"></div>' +
     '</div>';
   function mostrar(){
-    if (idx >= lista.length){
-      setTimeout(function(){
-        toast(aciertos === lista.length ? "¡Pleno! Les conoces demasiado bien." : "Bueno… casi. Se pasa por los pelos.", 2600);
-        go("n4");
-      }, 700);
-      return;
-    }
+    if (idx >= lista.length){ setTimeout(siguiente, 600); return; }
     var q = lista[idx];
     $("vbody").innerHTML =
       '<p><b>' + (idx+1) + '/' + lista.length + '.</b> ' + esc(q.t) + '</p>' +
@@ -402,12 +659,11 @@ screens.n3 = function(){
       '<p class="mut small" id="vfb" style="margin-top:12px"></p>';
     function resp(val, btn){
       var ok = (val === q.ok);
-      if (ok) aciertos++;
-      btn.disabled = true; $("bf").disabled = true; $("bv").disabled = true;
+      $("bv").disabled = true; $("bf").disabled = true;
       btn.className = "btn" + (ok ? " ok" : "");
       btn.style.borderColor = ok ? "var(--good)" : "var(--bad)";
       var other = $(val ? "bf" : "bv");
-      if (other && !ok) other.className = "btn ok"; else if (other) other.className = "btn ghost";
+      if (other) other.className = ok ? "btn ghost" : "btn ok";
       $("vfb").textContent = (ok ? "✔ " : "✘ ") + q.why;
       setTimeout(function(){ idx++; mostrar(); }, 2100);
     }
@@ -417,88 +673,82 @@ screens.n3 = function(){
   mostrar();
 };
 
-/* N4: simon */
+/* ================= N4: ordena la frase ================= */
 screens.n4 = function(){
-  setProg("Fase 4 / 7");
-  G.nivel = 4;
-  var emojis = ["🍺","🎂","🥳","🎵"];
-  var colores = ["#1f5aa8","#a8441f","#1f8a4d","#8a1f8a"];
-  var rondas = 4; // empieza en 3 y acaba en 6
-  var ronda = 0, fallos = 0;
-  var padEls = [];
+  setProg(faseTxt(4));
+  G.i = 3;
+  var frases = pick(CFG.frases, 2);
+  var idx = 0;
   app.innerHTML =
-    '<div class="card anim-in" id="sim">' +
-      '<h2>Fase 4 · Memoria de después de la tercera</h2>' +
-      '<p class="mut small">Repite la secuencia. Como el wifi de la finca: si falla, se corta y vuelta a empezar.</p>' +
-      '<div class="pads" id="pads"></div>' +
-      '<p id="smsj" class="small" style="text-align:center;min-height:22px"></p>' +
+    '<div class="card anim-in" id="of">' +
+      '<h2>Fase 4 · Reconstruye la frase</h2>' +
+      '<p class="mut small">Pulsa las palabras en el orden correcto. Si fallas, vuelven a su sitio.</p>' +
+      '<div id="ofbody"></div>' +
     '</div>';
-  var pads = $("pads");
-  emojis.forEach(function(e, i){
-    var p = document.createElement("div");
-    p.className = "pad"; p.textContent = e; p.setAttribute("role","button"); p.tabIndex = 0;
-    p.style.background = "var(--panel2)";
-    p.dataset.i = i;
-    function tap(){ pulsar(i); }
-    p.addEventListener("click", tap);
-    p.addEventListener("keydown", function(ev){ if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); tap(); } });
-    pads.appendChild(p); padEls.push(p);
-  });
-  function pulsar(i){
-    var p = padEls[i];
-    p.classList.add("lit"); p.style.background = colores[i];
-    setTimeout(function(){ p.classList.remove("lit"); p.style.background = "var(--panel2)"; }, 260);
-    if (jugando) comprobar(i);
-  }
-  var secuencia = [], jugando = false, turno = 0;
-  function nuevaRonda(){
-    ronda++;
-    turno = 0; jugando = false;
-    secuencia = [];
-    for (var i=0;i<ronda+2;i++) secuencia.push(rnd(4));
-    $("smsj").textContent = "Ronda " + ronda + " de " + rondas + " · mira la secuencia…";
-    var k = 0;
-    var iv = setInterval(function(){
-      if (k >= secuencia.length){ clearInterval(iv); jugando = true; $("smsj").textContent = "¡Repítela!"; return; }
-      var n = secuencia[k++];
-      padEls[n].classList.add("lit"); padEls[n].style.background = colores[n];
-      setTimeout(function(){ padEls.forEach(function(p){ p.classList.remove("lit"); p.style.background = "var(--panel2)"; }); }, 420);
-    }, 620);
-  }
-  function comprobar(i){
-    if (!jugando) return;
-    if (secuencia[turno] === i){
-      turno++;
-      if (turno >= secuencia.length){
-        jugando = false;
-        $("smsj").textContent = "¡Correcto!";
-        if (ronda >= rondas){ setTimeout(function(){ go("n5"); }, 900); }
-        else setTimeout(nuevaRonda, 1100);
-      }
-    } else {
-      jugando = false;
-      fallos++;
-      if (fallos >= 2){
-        $("smsj").textContent = "Dos fallos… vale, se pasa. Nadie ha dicho nada.";
-        setTimeout(function(){ go("n5"); }, 1300);
+  function mostrar(){
+    var palabras = frases[idx].split(" ");
+    var total = palabras.length;
+    var puestas = [];
+    $("ofbody").innerHTML =
+      '<p><b>' + (idx+1) + '/2.</b></p>' +
+      '<div class="construida" id="const"></div>' +
+      '<div id="chips"></div>';
+    var mezcla = pick(palabras.map(function(p, i){ return {p:p, i:i}; }), total);
+    var chips = $("chips");
+    mezcla.forEach(function(w){
+      var c = document.createElement("button");
+      c.type = "button"; c.className = "chip"; c.dataset.i = w.i; c.textContent = w.p;
+      c.onclick = function(){
+        if (c.disabled) return;
+        c.disabled = true;
+        puestas.push(w.i);
+        var s = document.createElement("span");
+        s.className = "chip placed"; s.textContent = w.p;
+        $("const").appendChild(s);
+        if (puestas.length === total) comprobar();
+      };
+      chips.appendChild(c);
+    });
+    function comprobar(){
+      var ok = puestas.every(function(v, k){ return v === k; });
+      if (ok){
+        $("const").style.borderColor = "var(--good)";
+        setTimeout(function(){
+          idx++;
+          if (idx >= frases.length) siguiente(); else mostrar();
+        }, 500);
       } else {
-        $("smsj").textContent = "Fallaste. Se corta la conexión. Repetimos ronda.";
-        setTimeout(nuevaRonda, 1300);
+        var c = $("const");
+        c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
+        toast("Esa frase no la ha dicho nadie nunca.", 2200);
+        setTimeout(mostrar, 900);
       }
     }
   }
-  nuevaRonda();
+  mostrar();
 };
 
-/* N5: boton que huye */
+/* ================= N5: simon clasico ================= */
 screens.n5 = function(){
-  setProg("Fase 5 / 7");
-  G.nivel = 5;
+  G.i = 4;
+  simonRun({
+    rondas: 4, base: 3,
+    titulo: "Fase 5 · Memoria de después de la tercera",
+    sub: "Repite la secuencia. Como el wifi de la finca: si falla, se corta y vuelta a empezar.",
+    onWin: siguiente,
+    onFail: function(){ rendicion("Tus neuronas han pedido un descanso. Concedido."); }
+  });
+};
+
+/* ================= N6: el boton que huye ================= */
+screens.n6 = function(){
+  setProg(faseTxt(6));
+  G.i = 5;
   var intentos = 0, rindio = false;
   app.innerHTML =
     '<div class="card anim-in" id="hu">' +
-      '<h2>Fase 5 · Pulsa el botón</h2>' +
-      '<p class="mut small">Sí, ese. El de abajo. Bueno, el que puedas.</p>' +
+      '<h2>Fase 6 · Pulsa el botón</h2>' +
+      '<p class="mut small">Sí, ese. El de abajo. Bueno, el que puedas. Se mueve más que Jaime un sábado.</p>' +
       '<div class="huir" id="huir">' +
         '<button class="btn pri" id="huye" type="button">CONÉCTATE AQUÍ</button>' +
       '</div>' +
@@ -508,88 +758,328 @@ screens.n5 = function(){
   function mover(){
     if (rindio) return;
     intentos++;
-    var w = zona.clientWidth, h = zona.clientHeight, bw = 150, bh = 52;
-    var x = 10 + Math.random()*(w-bw-20);
-    var y = 10 + Math.random()*(h-bh-20);
+    var w = zona.clientWidth, h = zona.clientHeight, bw = Math.min(160, w - 24), bh = 52;
+    if (w < bw + 24) { bw = w - 24; }
+    var x = 12 + Math.random() * Math.max(1, (w - bw - 24));
+    var y = 12 + Math.random() * Math.max(1, (h - bh - 24));
     btn.style.left = x + "px"; btn.style.top = y + "px"; btn.style.transform = "none";
-    if (intentos < 4){
-      var frases = ["¡Ese no!","Casi…","Como esquivar a un comercial en el mercadillo."];
-      msg.textContent = frases[Math.min(intentos-1, frases.length-1)];
+    if (intentos < 5){
+      var frases = ["¡Ese no!", "Casi…", "Como esquivar a un comercial en el mercadillo.", "Estás a un dedo de conseguirlo."];
+      msg.textContent = frases[Math.min(intentos - 1, frases.length - 1)];
     } else {
       rindio = true;
       msg.textContent = "Vale, me rindo. Llevaba años huyendo de ti. Púlsame.";
       btn.textContent = "Vale, me rindo";
     }
   }
-  btn.addEventListener("pointerenter", function(e){ if (!rindio) mover(); });
+  btn.addEventListener("pointerenter", function(){ if (!rindio) mover(); });
   btn.addEventListener("pointerdown", function(e){ if (!rindio){ e.preventDefault(); mover(); } });
-  btn.addEventListener("click", function(){ if (rindio) go("boss"); });
+  btn.addEventListener("click", function(){ if (rindio) siguiente(); });
 };
 
-/* BOSS: examen sorpresa */
-screens.boss = function(){
-  setProg("Fase 6 / 7");
-  G.nivel = 6;
-  var bank = PREGUNTAS.boss.slice();
-  var rondas = 0, idx = 0, aciertos = 0;
-  var actual = pick(bank, 5);
+/* ================= N7: teclado bochinche ================= */
+screens.n7 = function(){
+  setProg(faseTxt(7));
+  G.i = 6;
+  var frase = pick(CFG.frasesTecleo, 1)[0];
+  var unicas = {}, letras = frase.split("");
+  letras.forEach(function(l){ unicas[l] = 1; });
+  var teclas = Object.keys(unicas);
+  CFG.palabraTruco.split("").forEach(function(l){ if (teclas.indexOf(l) < 0) teclas.push(l); });
+  var señuelos = [];
+  while (señuelos.length < (teclas.length < 10 ? 2 : 1)){
+    var l = "abcdefghijklmnñopqrstuvwxyz".charAt(rnd(27));
+    if (!unicas[l] && CFG.palabraTruco.indexOf(l) < 0 && señuelos.indexOf(l) < 0) señuelos.push(l);
+  }
+  teclas = teclas.concat(señuelos);
+  var orden = pick(teclas, teclas.length);
+  var escrito = "", tecleado = "", correctas = 0, errores = 0, trucoVisto = false;
+
   app.innerHTML =
-    '<div class="card anim-in" id="bs">' +
-      '<h2>Fase 6 · Examen sorpresa</h2>' +
-      '<p class="mut small">5 de 12 preguntas, al azar. Mínimo un 4 para aprobar. Se puede ir a recuperación.</p>' +
-      '<div id="bbody"></div>' +
+    '<div class="card anim-in" id="tb">' +
+      '<h2>Fase 7 · El teclado bochinche</h2>' +
+      '<p class="mut small">Escribe: <b id="objetivo" class="mono">' + esc(frase) + '</b>. Ojo: las teclas se recolocan cada 3 letras.</p>' +
+      '<div class="escrito" id="escrito"></div>' +
+      '<div class="teclado" id="teclado"></div>' +
+      '<button class="btn pri oculto" id="trucoBtn" type="button" style="margin-top:12px">⏭ Saltar fase (tú sabes por qué)</button>' +
+      '<p class="mut small" id="tbmsg" style="margin-top:10px;min-height:18px"></p>' +
+    '</div>';
+
+  function render(){
+    $("teclado").innerHTML = orden.map(function(k){
+      return '<button class="tecla" data-k="' + esc(k) + '" type="button">' + esc(k) + '</button>';
+    }).join("") + '<button class="tecla ancha" data-k="__bs" type="button">⌫ borrar</button>';
+    $("escrito").innerHTML = escrito.split("").map(function(c){ return "<span>" + esc(c) + "</span>"; }).join("") + '<span class="cursor">▌</span>';
+  }
+  $("teclado").addEventListener("click", function(e){
+    var t = e.target.closest(".tecla");
+    if (!t) return;
+    var k = t.dataset.k;
+    if (k === "__bs"){
+      if (escrito.length) escrito = escrito.slice(0, -1);
+      tecleado = tecleado.slice(0, -1);
+      render(); return;
+    }
+    tecleado += k;
+    if (escrito.length >= frase.length) return;
+    if (frase.charAt(escrito.length) === k){
+      escrito += k; correctas++;
+      $("tbmsg").textContent = "";
+      if (correctas % 3 === 0 && escrito.length < frase.length){
+        orden = pick(orden, orden.length);
+        toast("¡Las teclas se mueven!", 1200);
+      }
+      render();
+      if (escrito === frase){
+        $("tbmsg").textContent = "¡Escrito correctamente!";
+        setTimeout(siguiente, 600);
+      }
+    } else {
+      errores++;
+      var tb = $("tb");
+      tb.classList.remove("shake"); void tb.offsetWidth; tb.classList.add("shake");
+      $("tbmsg").textContent = "Esa letra no toca. Errores: " + errores + "/8";
+      if (errores >= 8){
+        $("tbmsg").textContent = "Ocho errores. El teclado se apiada de ti.";
+        setTimeout(siguiente, 900);
+      }
+    }
+    if (!trucoVisto && tecleado.indexOf(CFG.palabraTruco) >= 0){
+      trucoVisto = true;
+      $("trucoBtn").classList.remove("oculto");
+      toast("Alguien ha encontrado el truco 😉", 3000);
+    }
+  });
+  $("trucoBtn").onclick = function(){ siguiente(); };
+  render();
+};
+
+/* ================= N8: el mentiroso ================= */
+screens.n8 = function(){
+  setProg(faseTxt(8));
+  G.i = 7;
+  var score = 0, errores = 0, muerto = false, timer = null;
+  var holes = [];
+
+  app.innerHTML =
+    '<div class="card anim-in" id="ml" data-score="0" data-errores="0">' +
+      '<h2>Fase 8 · El mentiroso</h2>' +
+      '<p class="mut small">Toca solo cuando salga <b>\u{1F973}</b>. Si sale <b>\u{1F389}</b>, NO toques: miente. Diez aciertos y pasas. Cada fallo reinicia la ronda.</p>' +
+      '<div class="holes" id="holes"></div>' +
+      '<p class="small" id="mlmsg" style="text-align:center;min-height:20px"></p>' +
+    '</div>';
+  var cont = $("holes");
+  for (var i = 0; i < 9; i++){
+    (function(i){
+      var h = document.createElement("div");
+      h.className = "hole"; h.dataset.h = i;
+      h.addEventListener("click", function(){ pegar(h); });
+      cont.appendChild(h); holes.push(h);
+    })(i);
+  }
+  function marca(){
+    var ml = $("ml");
+    if (ml){ ml.dataset.score = String(score); ml.dataset.errores = String(errores); }
+  }
+  function ocultar(h){
+    h.classList.remove("pop"); h.innerHTML = ""; delete h.dataset.tipo;
+    setTimeout(function(){ h.classList.remove("bien"); h.classList.remove("mal"); }, 350);
+  }
+  function pegar(h){
+    if (!h.classList.contains("pop") || muerto) return;
+    if (h.dataset.tipo === "bueno"){
+      score++; h.classList.add("bien"); ocultar(h);
+      $("mlmsg").textContent = "¡Bien! " + score + "/10";
+      marca();
+      if (score >= 10){
+        muerto = true; clearTimeout(timer);
+        holes.forEach(function(x){ clearTimeout(x._t); ocultar(x); });
+        setTimeout(siguiente, 600);
+      }
+    } else {
+      errores++; h.classList.add("mal"); ocultar(h);
+      $("mlmsg").textContent = "¡Era mentira! Errores: " + errores + "/3 · ronda reiniciada";
+      marca();
+      if (errores >= 3){
+        muerto = true; clearTimeout(timer);
+        holes.forEach(function(x){ clearTimeout(x._t); ocultar(x); });
+        setTimeout(function(){ rendicion("El mentiroso te ha vencido. Le pasan cosas."); }, 800);
+      } else {
+        score = 0; marca();
+      }
+    }
+  }
+  function pop(){
+    if (muerto) return;
+    var h = holes[rnd(9)];
+    var bueno = Math.random() < 0.68;
+    h.dataset.tipo = bueno ? "bueno" : "malo";
+    h.classList.add("pop");
+    h.innerHTML = bueno ? "\u{1F973}" : "\u{1F389}";
+    clearTimeout(h._t);
+    h._t = setTimeout(function(){ ocultar(h); }, Math.max(780, 1150 - score * 45));
+    timer = setTimeout(pop, Math.max(620, 1200 - score * 55));
+  }
+  pop();
+};
+
+/* ================= N9: sin contar ================= */
+screens.n9 = function(){
+  setProg(faseTxt(9));
+  G.i = 8;
+  var n = 0;
+  app.innerHTML =
+    '<div class="card anim-in" id="tc9" data-n="0">' +
+      '<h2>Fase 9 · Sin contar</h2>' +
+      '<p class="mut small">Pulsa el botón grande <b>exactamente 10 veces</b>. No hay contador. Luego pulsa LISTO. Sabrás si te pasaste… o no.</p>' +
+      '<button class="btn pri tapgrande" id="tap10" type="button">TOCA</button>' +
+      '<button class="btn" id="listo9" type="button">LISTO</button>' +
+      '<p class="mut small" id="tc9msg" style="text-align:center;min-height:20px;margin-top:10px"></p>' +
+    '</div>';
+  $("tap10").onclick = function(){
+    n++;
+    $("tc9").dataset.n = String(n);
+  };
+  $("listo9").onclick = function(){
+    if (n === 10){
+      $("tc9msg").textContent = "¡Exacto! Diez. Ni nueve ni once.";
+      setTimeout(siguiente, 600);
+    } else {
+      var m = (n === 9 || n === 11) ? "¡Casi! (ni idea de cómo, pero casi.)"
+            : (n < 9) ? "Te has quedado corto: " + n + "."
+            : "Te has pasado: " + n + ".";
+      $("tc9msg").textContent = m + " Otra vez.";
+      n = 0; $("tc9").dataset.n = "0";
+    }
+  };
+};
+
+/* ================= N10: reaccion ================= */
+screens.n10 = function(){
+  setProg(faseTxt(10));
+  G.i = 9;
+  var ventanas = [700, 550, 450];
+  var ronda = 0, intentos = 0, estado = "espera", t0 = 0, timer = null;
+
+  app.innerHTML =
+    '<div class="card anim-in" id="rx">' +
+      '<h2>Fase 10 · Reflejos</h2>' +
+      '<p class="mut small">Toca la caja <b>cuando se ponga verde</b>. Ni antes (fallo) ni muy después. Tres rondas, cada una más rápida.</p>' +
+      '<div class="rbox" id="rbox" data-estado="espera" role="button" tabindex="0">ESPERA…</div>' +
+      '<p class="mut small" id="rxmsg" style="text-align:center;min-height:20px;margin-top:10px"></p>' +
+    '</div>';
+
+  function empezar(){
+    estado = "espera";
+    var box = $("rbox");
+    box.dataset.estado = "espera";
+    box.textContent = "ESPERA…";
+    $("rxmsg").textContent = "Ronda " + (ronda + 1) + "/3 · ventana de " + ventanas[ronda] + " ms";
+    timer = setTimeout(function(){
+      if (estado !== "espera") return;
+      estado = "verde"; t0 = Date.now();
+      box.dataset.estado = "verde";
+      box.textContent = "¡AHORA!";
+    }, 1200 + rnd(1400));
+  }
+  function tocar(){
+    var box = $("rbox");
+    if (!box) return;
+    if (estado === "espera"){
+      clearTimeout(timer);
+      estado = "fallo"; box.dataset.estado = "fallo"; box.textContent = "DEMASIADO PRONTO";
+      fallo("Has tocado antes de tiempo. Los nervios.");
+    } else if (estado === "verde"){
+      var dt = Date.now() - t0;
+      estado = "hecho"; box.dataset.estado = "hecho";
+      if (dt <= ventanas[ronda]){
+        box.textContent = "¡En " + dt + " ms!";
+        ronda++;
+        if (ronda >= 3){ setTimeout(siguiente, 700); }
+        else { setTimeout(empezar, 900); }
+      } else {
+        box.dataset.estado = "fallo";
+        box.textContent = "MUY LENTO: " + dt + " ms";
+        fallo("La ventana era de " + ventanas[Math.min(ronda,2)] + " ms.");
+      }
+    }
+  }
+  function fallo(msg){
+    intentos++;
+    $("rxmsg").textContent = msg + " Fallos: " + intentos + "/2";
+    if (intentos >= 2){ setTimeout(function(){ rendicion("Tus reflejos son de lunes por la mañana."); }, 900); }
+    else { setTimeout(empezar, 1100); }
+  }
+  $("rbox").addEventListener("click", tocar);
+  $("rbox").addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); tocar(); } });
+  empezar();
+};
+
+/* ================= N11: memoria inversa ================= */
+screens.n11 = function(){
+  G.i = 10;
+  simonRun({
+    rondas: 2, base: 4, inverso: true,
+    titulo: "Fase 11 · Memoria inversa",
+    sub: "La secuencia se repite AL REVÉS. Dos rondas. Sí, es cruel.",
+    onWin: siguiente,
+    onFail: function(){ rendicion("Al revés solo sabes leer el mapa del móvil."); }
+  });
+};
+
+/* ================= N12: sumas en español ================= */
+screens.n12 = function(){
+  setProg(faseTxt(12));
+  G.i = 11;
+  var preguntas = [];
+  while (preguntas.length < 4){
+    var a = 2 + rnd(7), b = 2 + rnd(7);
+    if (a + b > 10) continue;
+    var correcta = a + b;
+    var opciones = [{w: NUM[correcta], ok: true}];
+    var usados = {};
+    usados[correcta] = 1;
+    while (opciones.length < 4){
+      var w = 1 + rnd(10);
+      if (usados[w]) continue;
+      usados[w] = 1;
+      opciones.push({w: NUM[w], ok: false});
+    }
+    preguntas.push({a: a, b: b, opciones: opciones});
+  }
+  var idx = 0, aciertos = 0;
+  app.innerHTML =
+    '<div class="card anim-in" id="sm">' +
+      '<h2>Fase 12 · Sumas en español</h2>' +
+      '<p class="mut small">Con letras, no con números. Cuatro preguntas. Sin calculadora.</p>' +
+      '<div id="smbody"></div>' +
     '</div>';
   function mostrar(){
-    if (idx >= actual.length){
-      var nota = aciertos;
+    if (idx >= preguntas.length){
       setTimeout(function(){
-        if (nota >= 4){
-          toast("¡Aprobado con un " + nota + "!", 2200);
-          setTimeout(function(){ go("diploma"); }, 700);
-        } else {
-          toast("Un " + nota + ". A recuperación.", 2200);
-          setTimeout(function(){
-            rondas++;
-            if (rondas >= 2){
-              toast("El profesor se apiada de ti. Pasa.", 2400);
-              setTimeout(function(){ go("diploma"); }, 900);
-            } else {
-              idx = 0; aciertos = 0;
-              var usadas = actual.map(function(q){ return q.q; });
-              var resto = bank.filter(function(q){ return usadas.indexOf(q.q) < 0; });
-              actual = pick(resto.length >= 5 ? resto : bank, 5);
-              $("bs").innerHTML =
-                '<h2>Fase 6 · Recuperación</h2>' +
-                '<p class="mut small">Preguntas distintas. Mismo mínimo: 4.</p>' +
-                '<div id="bbody"></div>';
-              mostrar();
-            }
-          }, 900);
-        }
-      }, 600);
+        toast("Has acertado " + aciertos + " de 4.", 2500);
+        siguiente();
+      }, 500);
       return;
     }
-    var q = actual[idx];
-    var opts = pick(q.a, q.a.length);
-    $("bbody").innerHTML =
-      '<p><b>' + (idx+1) + '/5.</b> ' + esc(q.q) + '</p>' +
-      '<div id="bopts"></div>' +
-      '<p class="mut small" id="bfb" style="margin-top:10px"></p>';
-    var box = $("bopts");
-    opts.forEach(function(o){
+    var q = preguntas[idx];
+    var ops = pick(q.opciones, q.opciones.length);
+    $("smbody").innerHTML =
+      '<p><b>' + (idx+1) + '/4.</b> ¿Cuánto es <b>' + NUM[q.a].toUpperCase() + '</b> más <b>' + NUM[q.b].toUpperCase() + '</b>?</p>' +
+      '<div class="grid" style="grid-template-columns:1fr 1fr" id="smops"></div>';
+    var box = $("smops");
+    ops.forEach(function(o){
       var b = document.createElement("button");
-      b.type = "button"; b.className = "btn"; b.textContent = o.t;
+      b.type = "button"; b.className = "btn"; b.textContent = o.w;
       b.onclick = function(){
         box.querySelectorAll("button").forEach(function(x){ x.disabled = true; });
         if (o.ok){ b.className = "btn ok"; aciertos++; }
         else {
           b.style.borderColor = "var(--bad)";
-          var buen = q.a.filter(function(x){ return x.ok; })[0];
-          var bueno = Array.prototype.filter.call(box.querySelectorAll("button"), function(x){ return x.textContent === buen.t; })[0];
-          if (bueno) bueno.className = "btn ok";
+          var buena = q.opciones.filter(function(x){ return x.ok; })[0];
+          Array.prototype.some.call(box.querySelectorAll("button"), function(x){ if (x.textContent === buena.w){ x.className = "btn ok"; return true; } return false; });
         }
-        $("bfb").textContent = q.why;
-        setTimeout(function(){ idx++; mostrar(); }, 2200);
+        setTimeout(function(){ idx++; mostrar(); }, 1600);
       };
       box.appendChild(b);
     });
@@ -597,33 +1087,338 @@ screens.boss = function(){
   mostrar();
 };
 
-/* Diploma */
+/* ================= N13: el codigo acumulado ================= */
+screens.n13 = function(){
+  setProg(faseTxt(13));
+  G.i = 12;
+  var clave = G.digits.slice(0, G.done).join("");
+  var escrito = "", fallos = 0;
+
+  app.innerHTML =
+    '<div class="card anim-in" id="cd">' +
+      '<h2>Fase 13 · El código acumulado</h2>' +
+      '<p class="mut small">Cada sello que has ganado lleva un dígito. Aquí tienes que escribirlos <b>todos, en orden</b>. Si no los apuntaste, los tienes en el botón 📝 de abajo a la derecha.</p>' +
+      '<div class="construida mono" id="cdmstr" style="justify-content:center;font-size:22px;letter-spacing:.2em;min-height:60px"></div>' +
+      '<div class="numk" id="numk"></div>' +
+      '<p class="mut small" id="cdmsg" style="text-align:center;min-height:20px;margin-top:10px"></p>' +
+    '</div>';
+
+  var teclas = ["1","2","3","4","5","6","7","8","9","__bs","0","__ok"];
+  $("numk").innerHTML = teclas.map(function(k){
+    var txt = k === "__bs" ? "⌫" : (k === "__ok" ? "✓" : k);
+    return '<button data-k="' + k + '" type="button">' + txt + '</button>';
+  }).join("");
+  function pintar(){
+    $("cdmstr").textContent = escrito || "· · ·";
+  }
+  $("numk").addEventListener("click", function(e){
+    var b = e.target.closest("button");
+    if (!b) return;
+    var k = b.dataset.k;
+    if (k === "__bs"){ escrito = escrito.slice(0, -1); pintar(); return; }
+    if (k === "__ok"){
+      if (escrito === clave){
+        $("cdmsg").textContent = "Código correcto. Impresionante memoria.";
+        setTimeout(siguiente, 600);
+      } else {
+        fallos++;
+        var c = $("cd");
+        c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
+        if (fallos >= 2){
+          $("cdmsg").textContent = "El código era " + clave + ". Te lo perdiste por no mirar los sellos.";
+          setTimeout(siguiente, 1600);
+        } else {
+          $("cdmsg").textContent = "Ese no es. Pista: tienes " + clave.length + " dígitos que apuntar.";
+          escrito = ""; pintar();
+        }
+      }
+      return;
+    }
+    if (escrito.length < clave.length){ escrito += k; pintar(); }
+  });
+  pintar();
+};
+
+/* ================= N14: mastermind de emojis ================= */
+screens.n14 = function(){
+  setProg(faseTxt(14));
+  G.i = 13;
+  var codigo = [rnd(6), rnd(6), rnd(6)];
+  var intento = [];
+  var usados = 0;
+  var resuelto = false;
+
+  app.innerHTML =
+    '<div class="card anim-in" id="mm" data-codsol="' + codigo.join(",") + '">' +
+      '<h2>Fase 14 · La caja de los emojis</h2>' +
+      '<p class="mut small">Adivina la combinación de 3 emojis en 6 intentos. Tras cada intento te digo cuántos están en su sitio (✓) y cuántos están pero cambiados (~).</p>' +
+      '<div class="slots" id="slots"></div>' +
+      '<div class="grid" style="grid-template-columns:repeat(3,1fr)" id="mmkeys"></div>' +
+      '<div id="mmfb"></div>' +
+    '</div>';
+  var slots = $("slots");
+  for (var s = 0; s < 3; s++){
+    var d = document.createElement("div");
+    d.className = "slot"; slots.appendChild(d);
+  }
+  $("mmkeys").innerHTML = EMO_MASTER.map(function(e, i){
+    return '<button class="tecla" data-e="' + i + '" type="button" style="min-height:56px">' + e + '</button>';
+  }).join("") + '<button class="tecla ancha" data-e="__bs" type="button">⌫</button>' +
+             '<button class="tecla ancha" data-e="__ok" type="button" style="background:var(--acc);color:#1a1300">PROBAR</button>';
+
+  function pintar(){
+    Array.prototype.forEach.call(slots.children, function(el, i){
+      el.textContent = intento[i] !== undefined ? EMO_MASTER[intento[i]] : "";
+      el.className = "slot" + (intento[i] !== undefined ? " on" : "");
+    });
+  }
+  $("mmkeys").addEventListener("click", function(e){
+    var b = e.target.closest("button");
+    if (!b) return;
+    var k = b.dataset.e;
+    if (k === "__bs"){ intento.pop(); pintar(); return; }
+    if (k === "__ok"){
+      if (intento.length < 3 || resuelto) return;
+      resuelto = true;
+      usados++;
+      var ex = 0, pr = 0, uc = [], ue = [];
+      for (var i = 0; i < 3; i++){
+        if (intento[i] === codigo[i]){ ex++; uc[i] = ue[i] = true; }
+      }
+      for (var j = 0; j < 3; j++){
+        if (ue[j]) continue;
+        for (var k2 = 0; k2 < 3; k2++){
+          if (!uc[k2] && intento[j] === codigo[k2]){ pr++; uc[k2] = true; break; }
+        }
+      }
+      var linea = document.createElement("div");
+      linea.className = "fb";
+      linea.innerHTML = "<span>" + intento.map(function(x){ return EMO_MASTER[x]; }).join(" ") + "</span>" +
+        "<span><b>" + ex + " ✓</b> · " + pr + " ~</span>";
+      $("mmfb").appendChild(linea);
+      if (ex === 3){
+        toast("¡Combinación correcta!", 2000);
+        setTimeout(siguiente, 700);
+      } else if (usados >= 6){
+        setTimeout(function(){ rendicion("Seis intentos y ni un ✓. La caja te ha ganado."); }, 700);
+      } else {
+        intento = []; pintar();
+      }
+      return;
+    }
+    if (intento.length < 3){ intento.push(+k); pintar(); }
+  });
+  pintar();
+};
+
+/* ================= N15: simon ciego ================= */
+screens.n15 = function(){
+  G.i = 14;
+  simonRun({
+    rondas: 1, base: 7, ciego: true,
+    titulo: "Fase 15 · Simón ciego",
+    sub: "Siete emojis, se muestran UNA vez y se apagan. Repítelos a ciegas.",
+    onWin: siguiente,
+    onFail: function(){ rendicion("A ciegas solo encuentras el mando de la tele."); }
+  });
+};
+
+/* ================= N16: el laberinto ================= */
+screens.n16 = function(){
+  setProg(faseTxt(16));
+  G.i = 15;
+  var px = 0, py = 0, pasos = 0;
+  app.innerHTML =
+    '<div class="card anim-in" id="mz">' +
+      '<h2>Fase 16 · El laberinto</h2>' +
+      '<p class="mut small">Lleva el punto amarillo hasta la fiesta \u{1F389}. Usa las flechas. 60 movimientos y te apiadas.</p>' +
+      '<div class="maze" id="maze"></div>' +
+      '<div class="dpad" id="dpad">' +
+        '<span></span><button data-dir="up" type="button">↑</button><span></span>' +
+        '<button data-dir="left" type="button">←</button><button data-dir="down" type="button">↓</button><button data-dir="right" type="button">→</button>' +
+      '</div>' +
+      '<p class="mut small" id="mzmsg" style="text-align:center;min-height:20px;margin-top:10px">Movimientos: 0</p>' +
+    '</div>';
+  function pintar(){
+    var html = "";
+    for (var y = 0; y < 5; y++){
+      for (var x = 0; x < 5; x++){
+        var cls = "celda";
+        if (MAZE[y][x] === 1) cls += " muro";
+        if (x === 4 && y === 4) cls += " meta";
+        if (x === px && y === py) cls += " jugador";
+        html += '<div class="' + cls + '" data-x="' + x + '" data-y="' + y + '" data-muro="' + MAZE[y][x] + '"' +
+                (x === 4 && y === 4 ? ' data-meta="1"' : "") + '>' +
+                (x === px && y === py ? "•" : (x === 4 && y === 4 ? "\u{1F389}" : "")) + '</div>';
+      }
+    }
+    $("maze").innerHTML = html;
+  }
+  function mover(dir){
+    var nx = px, ny = py;
+    if (dir === "up") ny--; if (dir === "down") ny++;
+    if (dir === "left") nx--; if (dir === "right") nx++;
+    pasos++;
+    if (nx < 0 || ny < 0 || nx > 4 || ny > 4 || MAZE[ny][nx] === 1){
+      var mz = $("mz");
+      mz.classList.remove("shake"); void mz.offsetWidth; mz.classList.add("shake");
+      $("mzmsg").textContent = "¡Pared! Movimientos: " + pasos;
+      if (pasos >= 60){ setTimeout(function(){ rendicion("Te has perdido hasta con flechas."); }, 600); }
+      return;
+    }
+    px = nx; py = ny;
+    $("mzmsg").textContent = "Movimientos: " + pasos;
+    pintar();
+    if (px === 4 && py === 4){
+      $("mzmsg").textContent = "¡Libre! En " + pasos + " movimientos.";
+      setTimeout(siguiente, 600);
+    } else if (pasos >= 60){
+      setTimeout(function(){ rendicion("Sesenta movimientos para no llegar. Impresionante."); }, 400);
+    }
+  }
+  $("dpad").addEventListener("click", function(e){
+    var b = e.target.closest("button");
+    if (b) mover(b.dataset.dir);
+  });
+  pintar();
+};
+
+/* ================= easter eggs de administrador ================= */
+$("admSkip").onclick = function(){
+  $("adminPanel").classList.add("oculto");
+  toast("Fase saltada (con sello de la lástima).");
+  siguiente();
+};
+$("admCodigo").onclick = function(){
+  $("adminPanel").classList.add("oculto");
+  toast("Código: " + G.digits.slice(0, G.done).join(""), 8000);
+};
+$("admExamen").onclick = function(){
+  G.examenAyuda = !G.examenAyuda;
+  $("adminPanel").classList.add("oculto");
+  toast(G.examenAyuda ? "Modo examen ON: ahora aciertas siempre." : "Modo examen OFF.", 3000);
+};
+$("admCerrar").onclick = function(){ $("adminPanel").classList.add("oculto"); };
+
+console.log("%c🍺 Finca Los Almendros · Portal de invitados", "font-weight:bold");
+console.log("%cPista 1: en el nombre pon 'admin'.", "color:#888");
+console.log("%cPista 2: toca 7 veces el '5G' de la cabecera.", "color:#888");
+console.log("%cPista 3: en el nivel del teclado escribe 'truco'.", "color:#888");
+console.log("%cNunca gonna give you up.", "color:#e62117");
+
+/* ================= BOSS: examen sorpresa ================= */
+screens.boss = function(){
+  setProg(faseTxt(TOTAL_FASES));
+  var bank = PREGUNTAS.boss.slice();
+  var usadas = [];
+  var rondas = 0, idx = 0, aciertos = 0;
+  var actual = [];
+
+  function elegir(){
+    var restantes = bank.filter(function(q){ return usadas.indexOf(q.q) < 0; });
+    if (restantes.length < 10) return null;
+    var set = pick(restantes, 10);
+    set.forEach(function(q){ usadas.push(q.q); });
+    return set;
+  }
+  function cardTitulo(){
+    $("bs").innerHTML =
+      '<h2>' + (rondas === 0 ? "Fase 17 · Examen sorpresa" : "Recuperación " + rondas + "/2") + '</h2>' +
+      '<p class="mut small">10 preguntas al azar del banco. Mínimo un <b>7</b> para aprobar. Sin chuletas… salvo que seas el organizador.</p>' +
+      '<div id="bbody"></div>';
+  }
+  function mostrar(){
+    if (idx >= actual.length){
+      var nota = aciertos;
+      setTimeout(function(){
+        if (nota >= 7){
+          toast("¡Aprobado con un " + nota + "!", 2200);
+          setTimeout(function(){ go("diploma"); }, 700);
+        } else {
+          rondas++;
+          if (rondas >= 3){ rendicion("Ni a la tercera. El profesor se apiada de ti. Pasa."); return; }
+          toast("Un " + nota + ". A recuperación (" + rondas + "/2).", 2200);
+          setTimeout(function(){
+            idx = 0; aciertos = 0;
+            actual = elegir() || [];
+            cardTitulo();
+            mostrar();
+          }, 900);
+        }
+      }, 600);
+      return;
+    }
+    var q = actual[idx];
+    var ops = pick(q.a, q.a.length);
+    $("bbody").innerHTML =
+      '<p><b>' + (idx+1) + '/10.</b> ' + esc(q.q) + '</p>' +
+      '<div id="bopts"></div>' +
+      '<p class="mut small" id="bfb" style="margin-top:10px"></p>';
+    var box = $("bopts");
+    ops.forEach(function(o){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "btn"; b.textContent = o.t;
+      b.onclick = function(){
+        box.querySelectorAll("button").forEach(function(x){ x.disabled = true; });
+        var correcta = o.ok || G.examenAyuda;
+        if (correcta){
+          b.className = "btn ok"; aciertos++;
+          $("bfb").textContent = q.why;
+        } else {
+          b.style.borderColor = "var(--bad)";
+          var buen = q.a.filter(function(x){ return x.ok; })[0];
+          Array.prototype.some.call(box.querySelectorAll("button"), function(x){ if (x.textContent === buen.t){ x.className = "btn ok"; return true; } return false; });
+          $("bfb").textContent = q.why;
+        }
+        setTimeout(function(){ idx++; mostrar(); }, 2200);
+      };
+      box.appendChild(b);
+    });
+  }
+  app.innerHTML = '<div class="card anim-in" id="bs"></div>';
+  actual = elegir() || [];
+  cardTitulo();
+  mostrar();
+};
+
+/* ================= DIPLOMA ================= */
 screens.diploma = function(){
-  setProg("Fase 7 / 7");
+  setProg("Completado");
   var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  var pwd = ""; for (var i=0;i<4;i++) pwd += chars[rnd(chars.length)];
-  var pwd2 = ""; for (var j=0;j<4;j++) pwd2 += chars[rnd(chars.length)];
+  var p1 = "", p2 = "";
+  for (var i = 0; i < 4; i++) p1 += chars[rnd(chars.length)];
+  for (var j = 0; j < 4; j++) p2 += chars[rnd(chars.length)];
   app.innerHTML =
     '<div class="card anim-in">' +
       '<div class="dip">' +
         '<div class="ttl">Acreditativo de acceso a la red</div>' +
         '<div class="mut small">Finca Los Almendros · ' + esc(CFG.red) + '</div>' +
         '<div class="who">' + esc(G.nombre) + '</div>' +
-        '<p class="mut small">Ha superado las 7 fases del portal de invitados y queda autorizado a:</p>' +
-        '<p style="margin:6px 0"><b>Contraseña de la red:</b><br><span class="pwd">' + pwd + '-' + pwd2 + '</span></p>' +
-        '<div class="sello">🎉</div>' +
+        '<p class="mut small">Ha superado las ' + TOTAL_FASES + ' fases del portal de invitados con <b>' + G.done + '/16 sellos</b> ' + (G.done < 16 ? "(alguno de lástima, pero sellos)" : "") + ' y queda autorizado a:</p>' +
+        '<p style="margin:6px 0"><b>Contraseña de la red:</b><br><span class="pwd">' + p1 + '-' + p2 + '</span></p>' +
+        '<div class="sello" id="selloDip">🎉</div>' +
         '<p class="mut small">(La contraseña está tachada a propósito. Es una metáfora.)</p>' +
       '</div>' +
       '<button class="btn pri" id="desc" type="button">📶 DESCARGAR CONTRASEÑA</button>' +
       '<button class="btn ghost" id="repetir" type="button">Pasarle la broma a otro amigo</button>' +
     '</div>';
-  $("desc").onclick = function(){
-    go("final");
-  };
+  $("desc").onclick = function(){ go("final"); };
   $("repetir").onclick = function(){ resetJuego(); };
+
+  // easter egg: mantener pulsado el sello
+  var sello = $("selloDip"), tLP = null;
+  function secreto(){
+    sello.textContent = "🍺🎂🥳🎵🍕🎁";
+    toast("Felicidades a los cumpleañeros de parte del wifi invisible.", 5000);
+  }
+  sello.addEventListener("pointerdown", function(){
+    tLP = setTimeout(secreto, 900);
+  });
+  sello.addEventListener("pointerup", function(){ clearTimeout(tLP); });
+  sello.addEventListener("pointerleave", function(){ clearTimeout(tLP); });
 };
 
-/* Final: rickroll */
+/* ================= FINAL: rickroll ================= */
 screens.final = function(){
   setProg("Completado");
   app.innerHTML =
@@ -635,7 +1430,7 @@ screens.final = function(){
   var pasos = ["Negociando IP…","Buscando repetidor…","Cambiando la contraseña por otra…","Desactivando el cortafuegos…"];
   var iv = setInterval(function(){
     n++;
-    if (n < pasos.length) $("fmsg").textContent = pasos[n];
+    if (n < pasos.length && $("fmsg")) $("fmsg").textContent = pasos[n];
   }, 420);
   setTimeout(function(){
     clearInterval(iv);
@@ -645,7 +1440,7 @@ screens.final = function(){
       '<div class="big">NO HAY WIFI.<br>SOLO BARRA LIBRE.</div>' +
       '<p class="mut">' + esc(CFG.cumpleaneros) + ' os agradecen la visita.<br>Feliz cumpleaños. 🎉</p>' +
       '<div class="ytbox" id="yt" role="button" tabindex="0" aria-label="Ver el vídeo">' +
-        '<img src="https://i.ytimg.com/vi/' + YT_ID + '/hqdefault.jpg" alt="Vídeo sorpresa">' +
+        '<img src="https://i.ytimg.com/vi/' + YT_ID + '/hqdefault.jpg" alt="Vídeo sorpresa" loading="lazy">' +
         '<div class="ytplay"><div class="tri"></div><span>Lo que Luis y Jaime hicieron el finde pasado</span></div>' +
       '</div>' +
       '<p class="mut small" style="margin-top:14px">Ningún router ha sido dañado en esta broma.</p>' +
@@ -666,29 +1461,33 @@ screens.final = function(){
     }
     var yt = $("yt");
     yt.onclick = abrir;
-    yt.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); abrir(); } });
+    yt.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); abrir(); } });
     bindReset();
   }, 2100);
 };
 
+/* ================= arranque ================= */
 function resetJuego(){
-  try { localStorage.removeItem("cumpleWifi.v1"); } catch(e){}
-  G = { nombre:"", nivel:0 };
+  G = nuevoEstado();
+  refrescaNotas();
   go("cebo");
 }
 
 function render(screen){
   try { screens[screen](); }
   catch(err){
-    app.innerHTML = '<div class="card"><h1>Ups</h1><p class="mut">Algo se ha roto en la verificación. Vuelve a empezar.</p><button class="btn pri" onclick="document.getElementById(&quot;reset&quot;).click()">Empezar de cero</button></div>';
+    app.innerHTML = '<div class="card"><h1>Ups</h1><p class="mut">Algo se ha roto en la verificación. Vuelve a empezar.</p><button class="btn pri" id="upsReset" type="button">Empezar de cero</button></div>';
     console.error(err);
+    var b = $("upsReset");
+    if (b) b.onclick = resetJuego;
   }
 }
 
 document.getElementById("reset").onclick = function(){ resetJuego(); };
-
+refrescaNotas();
 go("cebo");
+
 })();
 </script>
-  </body>
+</body>
 </html>
