@@ -449,13 +449,13 @@ $("notasBtn").onclick = function(){
 };
 $("notasCerrar").onclick = function(){ $("notasPanel").classList.add("oculto"); };
 
-// Sellar la fase actual y avanzar a la siguiente (un doble toque rapido
-// no puede provocar dos avances desde la misma fase)
+// Sellar la fase actual y avanzar a la siguiente.
+// conSello=false -> se pasa pero SIN sello (rendicion, piedad, admin).
 var ultimoAvanceDesde = -1;
-function siguiente(){
+function siguiente(conSello){
   if (ultimoAvanceDesde === G.i) return;
   ultimoAvanceDesde = G.i;
-  if (G.i < NIVELES.length){
+  if (conSello !== false && G.i < NIVELES.length){
     G.done++;
     refrescaNotas();
   }
@@ -464,7 +464,7 @@ function siguiente(){
   else go(NIVELES[G.i]);
 }
 
-// Salida digna cuando alguien se atasca: nadie se queda sin jugar
+// Salida digna cuando alguien se atasca: nadie se queda sin jugar, pero sin sello
 function rendicion(motivo){
   setProg(faseTxt(G.i + 1));
   app.className = "anim-in";
@@ -472,10 +472,10 @@ function rendicion(motivo){
     '<div class="card">' +
       '<h1>El portal se apiada de ti</h1>' +
       '<p class="mut">' + esc(motivo) + '</p>' +
-      '<p>Concedido el <b>sello de la lástima</b> (con su dígito, como los demás). Nadie tiene por qué enterarse.</p>' +
+      '<p>Pasas a la siguiente fase, pero <b>sin sello</b>: este no te lo has ganado.</p>' +
       '<button class="btn pri" id="seguir" type="button">Aceptar mi derrota y seguir</button>' +
     '</div>';
-  $("seguir").onclick = function(){ siguiente(); };
+  $("seguir").onclick = function(){ siguiente(false); };
 }
 
 var screens = {};
@@ -711,14 +711,14 @@ function repartir(celdas){
 screens.n2 = function(){
   setProg(faseTxt(2));
   G.i = 1;
-  var r = 0, fallos = 0, rondaOk = false;
+  var r = 0, fallos = 0, rondaOk = false, sinSello = false;
   app.innerHTML = '<div class="card anim-in" id="cap"><div id="f2body"></div></div>';
 
   function avanzar(){
     if (rondaOk) return;
     rondaOk = true;
     setTimeout(function(){
-      if (r >= FOTOS.length) siguiente();
+      if (r >= FOTOS.length) siguiente(!sinSello);
       else mostrar();
     }, 450);
   }
@@ -768,7 +768,7 @@ screens.n2 = function(){
       card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
       var msgs = ["Esa no es. Ni de broma.","Estás seleccionando como Jaime elige restaurante.","¿Ves la diferencia o te lo dibujo?","Ni con lupa encuentras al que toca."];
       if (fallos === 2) toast("Pista: hay " + celdas.filter(function(c){ return c.ok; }).length + " correctas, y ninguna más.", 3200);
-      else if (fallos >= 3){ toast("El portal se apiada. Pasas a la siguiente ronda.", 2600); r++; avanzar(); }
+      else if (fallos >= 3){ toast("El portal se apiada. Pasas a la siguiente ronda.", 2600); sinSello = true; r++; avanzar(); }
       else toast(msgs[rnd(msgs.length)], 2600);
     };
   }
@@ -857,6 +857,7 @@ screens.n4 = function(){
   var idx = 0;
   var fallosFrase = 0;
   var renderGen = 0;
+  var sinSello = false;
   app.innerHTML =
     '<div class="card anim-in" id="of">' +
       '<h2>Fase 4 · El grupo de Casco de Papa</h2>' +
@@ -918,6 +919,7 @@ screens.n4 = function(){
       var ok = puestas.every(function(v, k){ return v === k; });
       if (ok){
         bloqueado = true;
+        if (fallosFrase >= 2) sinSello = true;   // la frase se completo con ayuda: sin sello
         fallosFrase = 0;
         var meta = $("wameta");
         meta.classList.remove("oculto");
@@ -925,7 +927,7 @@ screens.n4 = function(){
           (frase.sub ? '<span class="sub">' + esc(frase.sub) + '</span>' : "");
         setTimeout(function(){
           idx++;
-          if (idx >= frases.length) siguiente(); else mostrar();
+          if (idx >= frases.length) siguiente(!sinSello); else mostrar();
         }, 2200);
       } else {
         fallosFrase++;
@@ -1072,7 +1074,7 @@ screens.n7 = function(){
       toast("Alguien ha encontrado el truco 😉", 3000);
     }
   });
-  $("trucoBtn").onclick = function(){ siguiente(); };
+  $("trucoBtn").onclick = function(){ siguiente(false); };
   render();
 };
 
@@ -1357,7 +1359,7 @@ screens.n13 = function(){
         c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
         if (fallos >= 2){
           $("cdmsg").textContent = "El código era " + clave + ". Te lo perdiste por no mirar los sellos.";
-          setTimeout(siguiente, 1600);
+          setTimeout(function(){ siguiente(false); }, 1600);
         } else {
           $("cdmsg").textContent = "Ese no es. Pista: tienes " + clave.length + " dígitos que apuntar.";
           escrito = ""; pintar();
@@ -1528,9 +1530,9 @@ function refrescaAdmin(){
 }
 function saltarFase(){
   if (!G.admin) return;
-  toast("Fase saltada (con sello de la lástima).");
+  toast("Fase saltada. Sin sello: esto es para el organizador.");
   $("adminPanel").classList.add("oculto");
-  siguiente();
+  siguiente(false);
 }
 $("admSaltar").onclick = saltarFase;
 $("admSkip").onclick = saltarFase;
