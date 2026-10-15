@@ -168,6 +168,13 @@
   .notas-panel{position:fixed; left:12px; right:12px; bottom:62px; z-index:41; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; max-width:420px; margin:0 auto; box-shadow:0 8px 30px rgba(0,0,0,.5)}
   .oculto{display:none !important}
   .dig{display:inline-block; min-width:32px; margin:3px; padding:6px 0; text-align:center; border-radius:8px; background:var(--panel2); border:1px solid var(--acc); font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:700}
+  .dig.falta{opacity:.35; border-color:var(--line)}
+  .fila-fase{display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; margin:3px 0; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--tx); font-size:14px; cursor:pointer; text-align:left}
+  .fila-fase:active{background:var(--acc); color:#1a1300}
+  .fila-fase .num{width:22px; text-align:center; font-weight:800; color:var(--acc)}
+  .fila-fase:active .num{color:#1a1300}
+  .fila-fase .nom{flex:1}
+  .fila-fase .est{width:22px; text-align:center}
   .anim-in{animation:in .25s ease}
   .shake{animation:shk .4s ease}
   @keyframes in{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
@@ -189,7 +196,15 @@
   <footer class="foot">Portal de invitados v2.2 · <button id="reset" type="button">empezar de cero</button></footer>
 </div>
 <button class="notas-btn" id="notasBtn" type="button">📝 <span id="notasN">0</span>/16</button>
-<button class="notas-btn" id="admSaltar" type="button" style="display:none; right:96px">⏭ saltar fase</button>
+<button class="notas-btn" id="fasesBtn" type="button" style="right:180px">📋 fases</button>
+<button class="notas-btn" id="admSaltar" type="button" style="display:none; right:264px">⏭ saltar</button>
+<button class="notas-btn" id="atrasBtn" type="button" style="right:348px">← atrás</button>
+<div class="notas-panel oculto" id="fasesPanel">
+  <h2 style="margin-bottom:6px">Las 17 pruebas</h2>
+  <p class="mut small" style="margin-bottom:8px">Salta a la que quieras y ve acumulando sellos. ✓ = sellada · = sin sello todavía.</p>
+  <div id="fasesLista"></div>
+  <button class="btn ghost" id="fasesCerrar" type="button">Cerrar</button>
+</div>
 <div class="notas-panel oculto" id="confirmReset">
   <h2 style="margin-bottom:6px">¿Empezar de cero?</h2>
   <p class="mut small" style="margin-bottom:10px">Perderás todo el progreso y los sellos. Es un sí/no, no un despiste.</p>
@@ -416,9 +431,20 @@ var G = nuevoEstado();
 var toastTimer = null;
 
 function nuevoEstado(){
-  var digits = [];
-  for (var i=0;i<16;i++) digits.push(String(rnd(10)));
-  return { nombre:"", i:0, digits:digits, done:0, examenAyuda:false, admin:false, finalAbierto:false };
+  var digits = [], sellos = [];
+  for (var i=0;i<16;i++){ digits.push(String(rnd(10))); sellos.push(false); }
+  return { nombre:"", i:0, digits:digits, sellos:sellos, examenAyuda:false, admin:false, finalAbierto:false };
+}
+// digitos de las fases selladas, en orden de numero de fase
+function sellados(){
+  var out = [];
+  for (var i=0;i<G.sellos.length;i++) if (G.sellos[i]) out.push(G.digits[i]);
+  return out;
+}
+function cuantosSellos(){
+  var n = 0;
+  for (var i=0;i<G.sellos.length;i++) if (G.sellos[i]) n++;
+  return n;
 }
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
@@ -436,13 +462,37 @@ function go(screen){ render(screen); window.scrollTo(0,0); }
 function faseTxt(n){ return "Fase " + n + " / " + TOTAL_FASES; }
 
 function refrescaNotas(){
-  $("notasN").textContent = String(G.done);
-  if (!$("notasPanel").classList.contains("oculto")){
-    var s = "";
-    for (var i=0;i<G.done;i++) s += '<span class="dig">' + G.digits[i] + '</span>';
-    $("notasLista").innerHTML = s || '<span class="mut small">Aún no tienes sellos. Cuando pases una fase, aparecerá su dígito aquí.</span>';
+  $("notasN").textContent = String(cuantosSellos()) + "/16";
+  var s = "";
+  for (var i=0;i<G.sellos.length;i++){
+    s += G.sellos[i] ? '<span class="dig">' + G.digits[i] + '</span>' : '<span class="dig falta">·</span>';
   }
+  $("notasLista").innerHTML = cuantosSellos() ? s : '<span class="mut small">Aún no tienes sellos. Cuando pases una fase, aparecerá su dígito aquí.</span>';
+  if (!$("notasPanel").classList.contains("oculto")) refrescaFases();
 }
+var NOMBRES_FASES = ["Identificación","Rondas de fotos","Cuestionario","Burbujas de WhatsApp","Simón asco","Bizum a Luis","Mensaje 05:42","Detector de chóped","Chorro a ojo","Salvar el cubata","Memoria inversa","Sumas en español","Código acumulado","Mastermind","Simón ciego","La retirada","Examen sorpresa"];
+function refrescaFases(){
+  var html = "";
+  for (var i=0;i<17;i++){
+    var sello = (i < 16) ? (G.sellos[i] ? "✓" : "·") : "🎓";
+    html += '<button class="fila-fase" data-f="' + i + '" type="button"><span class="num">' + (i+1) + '</span>' +
+            '<span class="nom">' + NOMBRES_FASES[i] + '</span><span class="est">' + sello + '</span></button>';
+  }
+  $("fasesLista").innerHTML = html;
+  Array.prototype.forEach.call(document.querySelectorAll("#fasesLista .fila-fase"), function(b){
+    b.onclick = function(){ irAFase(+b.dataset.f); $("fasesPanel").classList.add("oculto"); };
+  });
+}
+$("fasesBtn").onclick = function(){
+  $("fasesPanel").classList.toggle("oculto");
+  refrescaFases();
+};
+$("fasesCerrar").onclick = function(){ $("fasesPanel").classList.add("oculto"); };
+// volver atras: a la prueba anterior (o a la intro desde la 1)
+$("atrasBtn").onclick = function(){
+  if (G.i <= 0){ go("intro"); return; }
+  irAFase(G.i - 1);
+};
 $("notasBtn").onclick = function(){
   $("notasPanel").classList.toggle("oculto");
   refrescaNotas();
@@ -450,18 +500,25 @@ $("notasBtn").onclick = function(){
 $("notasCerrar").onclick = function(){ $("notasPanel").classList.add("oculto"); };
 
 // Sellar la fase actual y avanzar a la siguiente.
-// conSello=false -> se pasa pero SIN sello (rendicion, piedad, admin).
+// conSello=false -> se pasa pero SIN sello (rendicion, piedad).
+// Ir a una fase concreta (navegacion libre entre pruebas)
+function irAFase(n){
+  if (n < 0){ go("intro"); return; }
+  G.i = n;
+  if (n < NIVELES.length) go(NIVELES[n]);
+  else if (n === NIVELES.length) go("boss");
+  else go("diploma");
+}
 var ultimoAvanceDesde = -1;
 function siguiente(conSello){
   if (ultimoAvanceDesde === G.i) return;
   ultimoAvanceDesde = G.i;
-  if (conSello !== false && G.i < NIVELES.length){
-    G.done++;
-    refrescaNotas();
-  }
+  if (conSello !== false && G.i < NIVELES.length) G.sellos[G.i] = true;
+  refrescaNotas();
   G.i++;
-  if (G.i >= NIVELES.length) go("boss");
-  else go(NIVELES[G.i]);
+  if (G.i < NIVELES.length) go(NIVELES[G.i]);
+  else if (G.i === NIVELES.length) go("boss");
+  else go("diploma");
 }
 
 // Salida digna cuando alguien se atasca: nadie se queda sin jugar, pero sin sello
@@ -979,21 +1036,27 @@ screens.n6 = function(){
     "Me he quedado sin cobertura",
     "Te pago la siguiente ronda y quedamos en paz"
   ];
+  var pos = null, bw = 108, bh = 40;
   function mover(){
     if (rindio) return;
     intentos++;
-    var w = zona.clientWidth, h = zona.clientHeight, bw = Math.min(170, w - 24), bh = 52;
-    if (w < bw + 24) { bw = w - 24; }
-    var x = 12 + Math.random() * Math.max(1, (w - bw - 24));
-    var y = 12 + Math.random() * Math.max(1, (h - bh - 24));
-    btn.style.left = x + "px"; btn.style.top = y + "px"; btn.style.transform = "none";
+    var w = zona.clientWidth, h = zona.clientHeight;
+    if (!pos) pos = { x: Math.max(8, w/2 - bw/2), y: Math.max(8, h/2 - bh/2) };
+    // se mueve lo justo para esquivarte: poquito y rapidito
+    var dx = (Math.random() < 0.5 ? -1 : 1) * (13 + Math.random() * 26);
+    var dy = (Math.random() < 0.5 ? -1 : 1) * (9 + Math.random() * 20);
+    pos.x = Math.max(8, Math.min(w - bw - 8, pos.x + dx));
+    pos.y = Math.max(8, Math.min(h - bh - 8, pos.y + dy));
+    btn.style.left = pos.x + "px"; btn.style.top = pos.y + "px"; btn.style.transform = "none";
+    btn.style.minWidth = bw + "px"; btn.style.minHeight = bh + "px"; btn.style.fontSize = "13px"; btn.style.padding = "8px 10px";
     if (intentos < 5){
       btn.textContent = excusas[Math.min(intentos - 1, excusas.length - 1)];
       msg.textContent = "Esquiva " + intentos + "/5";
     } else {
       rindio = true;
       msg.textContent = "Vale, te los pago… pero que se enteré yo de que me has acorralado.";
-      btn.textContent = "Vale, mira, 3,50 €";
+      btn.textContent = "3,50 €";
+      btn.style.minWidth = "120px";
     }
   }
   btn.addEventListener("pointerenter", function(){ if (!rindio) mover(); });
@@ -1074,7 +1137,7 @@ screens.n7 = function(){
       toast("Alguien ha encontrado el truco 😉", 3000);
     }
   });
-  $("trucoBtn").onclick = function(){ siguiente(false); };
+  $("trucoBtn").onclick = function(){ siguiente(); };
   render();
 };
 
@@ -1322,7 +1385,7 @@ screens.n12 = function(){
 screens.n13 = function(){
   setProg(faseTxt(13));
   G.i = 12;
-  var clave = G.digits.slice(0, G.done).join("");
+  var clave = sellados().join("");
   var escrito = "", fallos = 0, ya = false;
 
   app.innerHTML =
@@ -1530,15 +1593,15 @@ function refrescaAdmin(){
 }
 function saltarFase(){
   if (!G.admin) return;
-  toast("Fase saltada. Sin sello: esto es para el organizador.");
+  toast("Fase saltada y sellada.");
   $("adminPanel").classList.add("oculto");
-  siguiente(false);
+  siguiente();
 }
 $("admSaltar").onclick = saltarFase;
 $("admSkip").onclick = saltarFase;
 $("admCodigo").onclick = function(){
   $("adminPanel").classList.add("oculto");
-  toast("Código: " + G.digits.slice(0, G.done).join(""), 8000);
+  toast("Código: " + sellados().join(""), 8000);
 };
 $("admExamen").onclick = function(){
   G.examenAyuda = !G.examenAyuda;
@@ -1654,22 +1717,18 @@ screens.boss = function(){
 /* ================= DIPLOMA ================= */
 screens.diploma = function(){
   setProg("Completado");
-  var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  var p1 = "", p2 = "";
-  for (var i = 0; i < 4; i++) p1 += chars[rnd(chars.length)];
-  for (var j = 0; j < 4; j++) p2 += chars[rnd(chars.length)];
+  G.finalAbierto = false;
   app.innerHTML =
     '<div class="card anim-in">' +
       '<div class="dip">' +
         '<div class="ttl">Acreditativo de acceso a la red</div>' +
         '<div class="mut small">' + esc(CFG.finca) + ' · ' + esc(CFG.red) + '</div>' +
         '<div class="who">' + esc(G.nombre) + '</div>' +
-        '<p class="mut small">Ha superado las ' + TOTAL_FASES + ' fases del portal de invitados con <b>' + G.done + '/16 sellos</b> ' + (G.done < 16 ? "(alguno de lástima, pero sellos)" : "") + ' y queda autorizado a:</p>' +
-        '<p style="margin:6px 0"><b>Contraseña de la red:</b><br><span class="pwd">' + p1 + '-' + p2 + '</span></p>' +
+        '<p class="mut small">Has superado las ' + TOTAL_FASES + ' fases del portal de invitados con <b>' + cuantosSellos() + '/16 sellos</b> ' + (cuantosSellos() < 16 ? "(alguna se te resistió)" : "(¡pleno!)") + '.</p>' +
         '<div class="sello" id="selloDip">🎉</div>' +
-        '<p class="mut small">(La contraseña está tachada a propósito. Es una metáfora.)</p>' +
+        '<p class="mut small">Ya puedes conseguir la contraseña de la red.</p>' +
       '</div>' +
-      '<button class="btn pri" id="desc" type="button">📶 DESCARGAR CONTRASEÑA</button>' +
+      '<button class="btn pri" id="desc" type="button">📶 OBTENER CONTRASEÑA</button>' +
       '<button class="btn ghost" id="repetir" type="button">Pasarle la broma a otro amigo</button>' +
     '</div>';
   $("desc").onclick = function(){ if (G.finalAbierto) return; G.finalAbierto = true; go("final"); };
@@ -1709,30 +1768,15 @@ screens.final = function(){
     ov.innerHTML =
       '<div class="big">NO HAY WIFI.<br>SOLO BARRA LIBRE.</div>' +
       '<p class="mut">' + esc(CFG.cumpleaneros) + ' os agradecen la visita.<br>Feliz cumpleaños. 🎉</p>' +
-      '<div class="ytbox" id="yt" role="button" tabindex="0" aria-label="Ver el vídeo">' +
-        '<img src="https://i.ytimg.com/vi/' + YT_ID + '/hqdefault.jpg" alt="Vídeo sorpresa" loading="lazy">' +
-        '<div class="ytplay"><div class="tri"></div><span>Lo que Luis y Jaime hicieron el finde pasado</span></div>' +
-      '</div>' +
+      '<iframe src="https://www.youtube-nocookie.com/embed/' + YT_ID + '?autoplay=1&rel=0&playsinline=1" ' +
+      'allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen ' +
+      'style="width:min(94vw,520px);aspect-ratio:16/9;border:0;border-radius:14px;margin-top:12px;background:#000"></iframe>' +
       '<p class="mut small" style="margin-top:14px">Ningún router ha sido dañado en esta broma.</p>' +
       '<button class="btn ghost" id="ovreset" type="button" style="margin-top:10px;max-width:220px">Empezar de cero</button>';
     document.body.appendChild(ov);
-    function bindReset(){
-      var b = $("ovreset");
-      if (b) b.onclick = function(){ pedirReset(); };
-    }
-    function abrir(){
-      ov.innerHTML =
-        '<div class="big" style="font-size:clamp(20px,6vw,28px)">NO HAY WIFI. SOLO BARRA LIBRE.</div>' +
-        '<iframe src="https://www.youtube-nocookie.com/embed/' + YT_ID + '?autoplay=1&rel=0" ' +
-        'allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen ' +
-        'style="width:min(94vw,520px);aspect-ratio:16/9;border:0;border-radius:14px;margin-top:10px"></iframe>' +
-        '<button class="btn ghost" id="ovreset" type="button" style="margin-top:12px;max-width:220px">Empezar de cero</button>';
-      bindReset();
-    }
-    var yt = $("yt");
-    yt.onclick = abrir;
-    yt.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); abrir(); } });
-    bindReset();  }, 2100);
+    var b = $("ovreset");
+    if (b) b.onclick = function(){ pedirReset(); };
+  }, 2100);
 };
 
 /* ================= arranque ================= */
