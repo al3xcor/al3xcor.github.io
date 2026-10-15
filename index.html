@@ -139,9 +139,13 @@
   .fb{font-size:13px; color:var(--mut); border-top:1px solid var(--line); padding:6px 2px; display:flex; justify-content:space-between; gap:8px}
   .fb b{color:var(--tx)}
   /* laberinto */
-  .maze{display:grid; grid-template-columns:repeat(7,1fr); gap:3px; max-width:280px; margin:0 auto}
-  .celda{aspect-ratio:1; border-radius:6px; background:var(--panel2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:15px; user-select:none}
-  .celda.niebla{background:#05070a; border-color:#05070a; color:transparent}
+  .maze{display:grid; grid-template-columns:repeat(7,1fr); gap:3px; max-width:300px; margin:0 auto}
+  .celda{aspect-ratio:1; border-radius:8px; background:var(--panel2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:clamp(13px,4.5vw,20px); user-select:none; font-weight:800; color:var(--tx); padding:0; cursor:pointer}
+  .celda.mina{cursor:pointer}
+  .celda.abierta{background:#0b0e13; cursor:default; border-color:#0b0e13}
+  .celda.pelota{background:#3a0f0f; border-color:var(--bad)}
+  .celda.n1{color:#5b8def} .celda.n2{color:#3fb950} .celda.n3{color:#ff5c5c} .celda.n4{color:#b57bff}
+  .celda.n5{color:#ffb020} .celda.n6{color:#4dd0e1} .celda.n7{color:#e6edf3} .celda.n8{color:#8b98a5}
   .celda.muro{background:#080b0f; border-color:#080b0f}
   .celda.jugador{background:var(--acc); color:#1a1300; font-weight:800}
   .celda.meta{background:#3a2f10; border-color:var(--acc)}
@@ -169,6 +173,7 @@
   .notas-btn{position:fixed; right:12px; bottom:14px; z-index:40; background:var(--panel2); border:1px solid var(--line); color:var(--tx); border-radius:99px; padding:8px 14px; font-size:13px; cursor:pointer}
   .notas-panel{position:fixed; left:12px; right:12px; bottom:62px; z-index:41; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; max-width:420px; margin:0 auto; box-shadow:0 8px 30px rgba(0,0,0,.5); max-height:min(76vh, 620px); overflow-y:auto; -webkit-overflow-scrolling:touch}
   .oculto{display:none !important}
+  #confirmReset{z-index:70}
   .dig{display:inline-block; min-width:32px; margin:3px; padding:6px 0; text-align:center; border-radius:8px; background:var(--panel2); border:1px solid var(--acc); font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:700}
   .dig.falta{opacity:.35; border-color:var(--line)}
   .fila-fase{display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; margin:3px 0; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--tx); font-size:14px; cursor:pointer; text-align:left}
@@ -203,7 +208,7 @@
 <button class="notas-btn" id="atrasBtn" type="button" style="right:348px">← atrás</button>
 <div class="notas-panel oculto" id="fasesPanel">
   <h2 style="margin-bottom:6px">Las 17 pruebas</h2>
-  <p class="mut small" style="margin-bottom:8px">Salta a la que quieras y ve acumulando sellos. ✓ = sellada · = sin sello todavía.</p>
+  <p class="mut small" style="margin-bottom:8px">Salta a la que quieras y ve acumulando sellos. ✓ = sellada · = sin sello todavía. Para el examen sorpresa hacen falta 15 pruebas (llevas <b id="fasesHechas">0</b>).</p>
   <div id="fasesLista"></div>
   <button class="btn ghost" id="fasesCerrar" type="button">Cerrar</button>
 </div>
@@ -399,7 +404,45 @@ var FOTOS = [
    ====== FIN EDITA AQUÍ ==================================================
    ====================================================================== */
 
+/* ---- Examen sorpresa (fase 17): 10 preguntas fijas. Se desbloquea
+        cuando se han hecho 15 pruebas. ---- */
+var EXAMEN = [
+  { tipo:"auto", q:"¿Eres gay?",
+    opts:["Sí","a)","b)","f","no sé","f)","c)","buenas","No"], correcta:0 },
+  { tipo:"multi", q:"¿Cuántos tiene Jaime?",
+    opts:["25","26","30","28","29","27","Cuántos qué? ¿Peras? ¿Manzanas?"], correctas:[3,6] },
+  { tipo:"single", q:"Hazte un porro. Un qué? Un porro. Hazte un porro. Hazte un porro. Un qué? Un qué? Un porro. Un porro. Hazte un porro. Hazte un porro. Hazte un porro. Un qué?",
+    opts:["Un porro","Un qué?","Un qué? Un qué? Un porro. Un porro. Un porro","Hazte un porro"], correcta:2 },
+  { tipo:"single", q:"Hazte un qué. Un qué? Un qué. Hazte un qué. Hazte un qué. Un qué? Un qué? Un qué. Un qué. Hazte un qué. Hazte un qué. Hazte un qué. Un qué?",
+    opts:["Un qué? Un qué? Un qué. Un qué. Un qué","Un porro","Un qué?","Hazte un qué"], correcta:0 },
+  { tipo:"single", q:"¿Cuántos tiene Luis?",
+    opts:["A mi déjame","29","30","Ron y cerveza"], correcta:1 },
+  { tipo:"single", q:"Problema de los hermanos: uno tiene justo la mitad de años que el otro. Entre los dos suman 48. ¿Cuántos tiene el pequeño?",
+    opts:["24","16","12","El mismo que tenía cuando empezó el problema"], correcta:1 },
+  { tipo:"single", q:"Si por besar esos labios…",
+    opts:["fuera capaz de despertar a los muertos, pediría volver a hacerlo aunque me costara la vida entera.",
+          "tuviera que renunciar a todo lo que tengo, lo haría sin dudar un solo segundo, porque sé que no hay riqueza mayor.",
+          "tuviera que cruzar el desierto entero a pie, lo cruzaría descalzo y con una sonrisa en la cara.",
+          "tuviera que ir después al infierno lo haría sin ninguna duda. Así después podré presumir ante los demonios de haber estado en el paraíso sin nunca haber entrado."], correcta:3 },
+  { tipo:"single", q:"Mañana,",
+    opts:["y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana y mañana",
+          "y mañana, y mañana se arrastra con paso mezquino día tras día hasta la sílaba final del tiempo escrito…",
+          "y mañana, y mañana se arrastra con paso mezquino día tras día",
+          "es domingo."], correcta:1 },
+  { tipo:"single", q:"El tiro de la muerte lo inventó…",
+    opts:["Luis","Roberto Carlos","Juninho Piernasbutano","Javi"], correcta:2 },
+  { tipo:"single", q:"El padre de Jaime se parece a…",
+    opts:["Luis","Bertín","Coronado",
+          "Nadie, es único e irrepetible jo: una mezcla imposible entre la elegancia de un ministro, la mirada penetrante de un lince y la capacidad de contar el mismo chico tres veces en la misma comida como si fuera la primera. Es, sin lugar a dudas, el hombre que hizo grande a Jaime."], correcta:3 }
+];
+
 var YT_ID = "dQw4w9WgXcQ"; // rickroll
+
+/* ---- INTERRUPTOR PUBLICO ----
+   false = la web está cerrada para el público (sale "mantenimiento").
+   El organizador ("admin") entra siempre. Para abrirla al público,
+   cambia este false por true (o dime "ábrela" y lo hago en segundos). */
+var SITIO_ABIERTO = false;
 var NUM = ["cero","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve","diez","once","doce","trece","catorce","quince","dieciséis","diecisiete","dieciocho","diecinueve","veinte"];
 var EMO_MASTER = ["\u{1F37A}","\u{1F382}","\u{1F973}","\u{1F3B5}","\u{1F355}","\u{1F381}"]; // cerveza pastel fiesta musica pizza regalo
 
@@ -411,28 +454,14 @@ var CHOPED = [
   {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/Zinedine_Zidane_2015_%28cropped%29.jpg/330px-Zinedine_Zidane_2015_%28cropped%29.jpg", ok:1},
   {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Zinedine_Zidane_2018.jpg/330px-Zinedine_Zidane_2018.jpg", ok:1},
   {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Kobe_Bryant_2014.jpg/330px-Kobe_Bryant_2014.jpg", ok:1},
+  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Diego_Simeone_-_01.jpg/330px-Diego_Simeone_-_01.jpg", ok:1},
   {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Jason_Statham_2007.jpg/330px-Jason_Statham_2007.jpg", ok:0},
   {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Comb_over_or_combover_hairstyle_of_President_Donald_Trump_at_Superbowl_LIX_in_2025_%28cropped%29.jpg/330px-Comb_over_or_combover_hairstyle_of_President_Donald_Trump_at_Superbowl_LIX_in_2025_%28cropped%29.jpg", ok:0},
   {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Wayne-Rooney-2015-10-21.jpg/330px-Wayne-Rooney-2015-10-21.jpg", ok:0},
   {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Selfie_man_with_cap_and_glasses_in_Paris.jpg/330px-Selfie_man_with_cap_and_glasses_in_Paris.jpg", ok:0},
-  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Indian_man_whose_front_scalp_is_shaved%2C_with_long_hair_in_back._-_DPLA_-_257f62f5e35f63ef32d8dd6b26c58d0d.jpg/330px-Indian_man_whose_front_scalp_is_shaved%2C_with_long_hair_in_back._-_DPLA_-_257f62f5e35f63ef32d8dd6b26c58d0d.jpg", ok:0},
-  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Jeff_Bezos%27_iconic_laugh_crop.jpg/330px-Jeff_Bezos%27_iconic_laugh_crop.jpg", ok:0}
-];
-var MAZE = [
-  [0,0,1,0,0,0,0],
-  [1,0,1,0,1,1,0],
-  [0,0,0,0,0,1,0],
-  [0,1,1,1,0,1,0],
-  [0,1,0,0,0,1,0],
-  [0,1,0,1,0,0,0],
-  [0,0,0,1,0,0,0]
-];
-var MAZE2 = [
-  [0,0,0,1,0],
-  [1,1,0,1,0],
-  [0,0,0,0,0],
-  [0,1,1,1,1],
-  [0,0,0,0,0]
+  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Front_view_of_a_man_with_a_newly-shaved_head_posted_in_the_Bald_subreddit.jpg/330px-Front_view_of_a_man_with_a_newly-shaved_head_posted_in_the_Bald_subreddit.jpg", ok:0},
+  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Jeff_Bezos%27_iconic_laugh_crop.jpg/330px-Jeff_Bezos%27_iconic_laugh_crop.jpg", ok:0},
+  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Sergio_Ramos_%284980332829%29.jpg/330px-Sergio_Ramos_%284980332829%29.jpg", ok:0}
 ];
 var PADS_EMO = ["\u{1F943}","\u{1F959}","\u{1F48A}","\u{1F92E}"]; // (referencia historica)
 var PADS_URLS = [
@@ -451,9 +480,9 @@ var G = nuevoEstado();
 var toastTimer = null;
 
 function nuevoEstado(){
-  var digits = [], sellos = [];
-  for (var i=0;i<16;i++){ digits.push(String(rnd(10))); sellos.push(false); }
-  return { nombre:"", i:0, digits:digits, sellos:sellos, examenAyuda:false, admin:false, finalAbierto:false };
+  var digits = [], sellos = [], hechas = [];
+  for (var i=0;i<16;i++){ digits.push(String(rnd(10))); sellos.push(false); hechas.push(false); }
+  return { nombre:"", i:0, digits:digits, sellos:sellos, hechas:hechas, examenAyuda:false, admin:false, finalAbierto:false };
 }
 // digitos de las fases selladas, en orden de numero de fase
 function sellados(){
@@ -464,6 +493,12 @@ function sellados(){
 function cuantosSellos(){
   var n = 0;
   for (var i=0;i<G.sellos.length;i++) if (G.sellos[i]) n++;
+  return n;
+}
+// pruebas realizadas (selladas o pasadas por lastima): el examen pide 15
+function cuantasHechas(){
+  var n = 0;
+  for (var i=0;i<G.hechas.length;i++) if (G.hechas[i]) n++;
   return n;
 }
 function $(id){ return document.getElementById(id); }
@@ -478,8 +513,14 @@ function toast(msg, ms){
   toastTimer = setTimeout(function(){ t.remove(); }, ms||2400);
 }
 function setProg(txt){ progEl.textContent = txt; }
-function go(screen){ render(screen); window.scrollTo(0,0); }
+function go(screen){
+  if (!abierto() && screen !== "mantenimiento" && screen !== "intro"){
+    render("mantenimiento"); window.scrollTo(0,0); return;
+  }
+  render(screen); window.scrollTo(0,0);
+}
 function faseTxt(n){ return "Fase " + n + " / " + TOTAL_FASES; }
+function abierto(){ return SITIO_ABIERTO || G.admin; }
 
 function refrescaNotas(){
   $("notasN").textContent = String(cuantosSellos()) + "/16";
@@ -490,17 +531,29 @@ function refrescaNotas(){
   $("notasLista").innerHTML = cuantosSellos() ? s : '<span class="mut small">Aún no tienes sellos. Cuando pases una fase, aparecerá su dígito aquí.</span>';
   if (!$("notasPanel").classList.contains("oculto")) refrescaFases();
 }
-var NOMBRES_FASES = ["¿De quién es el cumple?","Rondas de fotos","Cuestionario","Casco de Papa","Simón asco","El Bizum de Luis","Mensaje 05:42","Detector de chóped","Chorro a ojo","Cubata cojo","Memoria inversa","Sumas raras","Código acumulado","Mastermind","Simón ciego","Retirada a tientas","Examen sorpresa"];
+var NOMBRES_FASES = ["¿De quién es el cumple?","Rondas de fotos","Cuestionario","Casco de Papa","Simón asco","El Bizum de Luis","Mensaje 05:42","Detector de chóped","Chorro a ojo","Cubata cojo","Memoria inversa","Sumas raras","Código acumulado","Mastermind","Simón ciego","Busca pelotas","Examen sorpresa"];
 function refrescaFases(){
   var html = "";
+  var examenAbierto = cuantasHechas() >= 15 || G.admin;
   for (var i=0;i<17;i++){
-    var sello = (i < 16) ? (G.sellos[i] ? "✓" : "·") : "🎓";
+    var sello = (i < 16) ? (G.sellos[i] ? "✓" : "·") : (examenAbierto ? "🎓" : "?");
     html += '<button class="fila-fase" data-f="' + i + '" type="button"><span class="num">' + (i+1) + '</span>' +
-            '<span class="nom">' + NOMBRES_FASES[i] + '</span><span class="est">' + sello + '</span></button>';
+            '<span class="nom">' + (i === 16 && !examenAbierto ? "??? (haz 15 pruebas)" : NOMBRES_FASES[i]) + '</span><span class="est">' + sello + '</span></button>';
   }
   $("fasesLista").innerHTML = html;
+  var h = $("fasesHechas");
+  if (h) h.textContent = String(cuantasHechas());
   Array.prototype.forEach.call(document.querySelectorAll("#fasesLista .fila-fase"), function(b){
-    b.onclick = function(){ irAFase(+b.dataset.f); $("fasesPanel").classList.add("oculto"); };
+    b.onclick = function(){
+      var f = +b.dataset.f;
+      if (f === 16 && !examenAbierto){
+        var faltan = 15 - cuantasHechas();
+        toast("El examen sorpresa se desbloquea con 15 pruebas. Te faltan " + faltan + ".", 3500);
+        return;
+      }
+      irAFase(f);
+      $("fasesPanel").classList.add("oculto");
+    };
   });
 }
 $("fasesBtn").onclick = function(){
@@ -535,6 +588,7 @@ function siguiente(conSello){
   if (ultimoAvanceDesde === G.i) return;
   ultimoAvanceDesde = G.i;
   if (conSello !== false && G.i < NIVELES.length) G.sellos[G.i] = true;
+  if (G.i < NIVELES.length) G.hechas[G.i] = true;
   refrescaNotas();
   G.i++;
   guardar();
@@ -722,6 +776,23 @@ screens.intro = function(){
   $("go").onclick = start;
   $("notasAtajo").onclick = function(){ $("notasPanel").classList.remove("oculto"); refrescaNotas(); };
   inp.addEventListener("keydown", function(e){ if (e.key === "Enter") start(); });
+};
+
+/* ================= pantalla de mantenimiento (web cerrada) ================= */
+screens.mantenimiento = function(){
+  setProg("");
+  app.className = "anim-in";
+  app.innerHTML =
+    '<div class="router">' +
+      '<div class="rhead"><span class="dot"></span> Conectado a ' + esc(CFG.red) + ' · 100% señal</div>' +
+      '<div class="rbody">' +
+        '<h2>Portal en mantenimiento</h2>' +
+        '<p>La red de la finca está en mantenimiento programado. El portal de invitados se abrirá el día del evento.</p>' +
+        '<p class="mcode">Código: MANTENIMIENTO_01 · Reintenta más tarde</p>' +
+      '</div>' +
+    '</div>' +
+    '<button class="btn ghost" id="orgBtn" type="button">Soy el organizador</button>';
+  $("orgBtn").onclick = function(){ go("intro"); };
 };
 
 /* ================= N1: identificacion ================= */
@@ -1059,29 +1130,38 @@ screens.n6 = function(){
     "Me he quedado sin cobertura",
     "Te pago la siguiente ronda y quedamos en paz"
   ];
-  var pos = null, bw = 150, bh = 44, MIN_BW = 34, MIN_BH = 30;
-  function mover(){
-    if (rindio) return;
-    intentos++;
+  var pos = null, bw = 160, bh = 46, MIN_BW = 26, MIN_BH = 26;
+  function mover(forzado){
+    if (rindio && !forzado) return;
+    if (!forzado) intentos++;
     var w = zona.clientWidth, h = zona.clientHeight;
-    if (!pos) pos = { x: Math.max(8, w/2 - bw/2), y: Math.max(8, h/2 - bh/2) };
-    // se mueve lo justo para esquivarte, y se encoge un poco mas cada vez
-    var dx = (Math.random() < 0.5 ? -1 : 1) * (13 + Math.random() * 30);
-    var dy = (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 22);
-    bw = Math.max(MIN_BW, bw - 22); bh = Math.max(MIN_BH, bh - 3);
+    if (!pos) pos = { x: Math.max(6, w/2 - bw/2), y: Math.max(6, h/2 - bh/2) };
+    // esquiva por proximidad: se aparta mas cuanto mas cerca lo tengas
+    var dx = (Math.random() < 0.5 ? -1 : 1) * (16 + Math.random() * 34);
+    var dy = (Math.random() < 0.5 ? -1 : 1) * (12 + Math.random() * 26);
+    bw = Math.max(MIN_BW, bw - 18); bh = Math.max(MIN_BH, bh - 2);
     pos.x = Math.max(6, Math.min(w - bw - 6, pos.x + dx));
     pos.y = Math.max(6, Math.min(h - bh - 6, pos.y + dy));
     btn.style.left = pos.x + "px"; btn.style.top = pos.y + "px"; btn.style.transform = "none";
-    btn.style.minWidth = bw + "px"; btn.style.minHeight = bh + "px"; btn.style.fontSize = (bw < 60 ? "10px" : "12px"); btn.style.padding = "6px 8px";
-    btn.textContent = bw < 60 ? "€" : excusas[Math.min(intentos - 1, excusas.length - 1)];
-    msg.textContent = "Esquiva " + intentos + "/6";
-    if (intentos >= 6){
+    btn.style.minWidth = bw + "px"; btn.style.minHeight = bh + "px"; btn.style.fontSize = (bw < 50 ? "10px" : "12px"); btn.style.padding = "6px 8px";
+    btn.textContent = bw < 50 ? "€" : excusas[Math.min(intentos - 1, excusas.length - 1)];
+    msg.textContent = "Esquiva " + Math.min(intentos, 8) + "/8";
+    if (intentos >= 8){
       rindio = true;
       msg.textContent = "Vale, te los pago… pero que se enteré yo de que me has acorralado.";
       btn.textContent = "3,50 €";
-      btn.style.minWidth = "120px"; btn.style.fontSize = "14px";
+      btn.style.minWidth = "120px"; btn.style.minHeight = "44px"; btn.style.fontSize = "14px";
     }
   }
+  // si te acercas con el dedo, esquiva antes de que llegues
+  zona.addEventListener("pointermove", function(e){
+    if (rindio) return;
+    var r = zona.getBoundingClientRect();
+    var bx = r.left + pos.x, by = r.top + pos.y;
+    var d = Math.sqrt(Math.pow(e.clientX - bx, 2) + Math.pow(e.clientY - by, 2));
+    if (d < bw * 1.15 + 26) mover(false);
+  });
+  zona.style.touchAction = "none";
   btn.addEventListener("pointerenter", function(){ if (!rindio) mover(); });
   btn.addEventListener("pointerdown", function(e){ if (!rindio){ e.preventDefault(); mover(); } });
   btn.addEventListener("click", function(){ if (rindio && !ya){ ya = true; siguiente(); } });
@@ -1251,59 +1331,74 @@ screens.n9 = function(){
     if (etapa === 0){
       card.innerHTML =
         '<h2>Fase 9 · Echar el chorro de alcohol a ojo</h2>' +
-        '<p class="mut small">Pantalla 1/3. Pulsa SIRVE 10 veces exactas y dale a LISTO.</p>' +
+        '<p class="mut small">Pantalla 1/3. Pulsa SIRVE 13 veces exactas y dale a LISTO. El contador miente: está borracho.</p>' +
+        '<div class="escrito" id="tcounter" style="text-align:center;font-size:34px">—</div>' +
         '<button class="btn pri tapgrande" id="tap10" type="button">SIRVE</button>' +
         '<button class="btn" id="listo9" type="button">LISTO</button>' +
         '<p class="mut small" id="tc9msg" style="text-align:center;min-height:20px;margin-top:10px"></p>';
       var n = 0, ya = false;
-      $("tap10").onclick = function(){ if (ya) return; n++; $("tc9").dataset.n = String(n); };
+      var mostrarMentira = function(){
+        var falso = n + (Math.random() < 0.5 ? -1 : 1) * (1 + rnd(4));
+        $("tcounter").textContent = String(Math.max(0, falso));
+      };
+      $("tap10").onclick = function(){ if (ya) return; n++; mostrarMentira(); };
       $("listo9").onclick = function(){
-        if (n === 10){
+        if (n === 13){
           if (ya) return;
           ya = true;
-          $("tc9msg").textContent = "¡Exacto! Diez. Ni nueve ni once.";
+          $("tc9msg").textContent = "¡Trece! Ni un vaso de más.";
           setTimeout(function(){ etapa = 1; pintar(); }, 800);
-        } else if (n === 9){
-          $("tc9msg").textContent = "Te has quedado corto. Tacaño hasta para servirte tú mismo."; n = 0;
-        } else if (n === 11){
-          $("tc9msg").textContent = "Te has pasado de frenada. Eso no es una copa, es un disolvente industrial."; n = 0;
         } else {
-          $("tc9msg").textContent = "Van " + n + ". Otra vez desde cero."; n = 0;
+          var m = Math.abs(n - 13) <= 1 ? "¡Casi! Pero casi no cuenta." : "Van " + n + ". Y el contador mentía. Otra vez.";
+          $("tc9msg").textContent = m;
+          n = 0;
+          $("tcounter").textContent = "—";
         }
-        $("tc9").dataset.n = "0";
       };
     } else if (etapa === 1){
       card.innerHTML =
         '<h2>Fase 9 · Pantalla 2/3 · NO TOQUES NADA</h2>' +
-        '<p class="mut small">Aguanta 5 segundos sin tocar nada. Ni el botón, ni la pantalla, ni a nadie.</p>' +
+        '<p class="mut small">Aguanta 8 segundos sin tocar nada. Ni el botón, ni la pantalla, ni a nadie.</p>' +
         '<div class="rbox" id="noToques" data-estado="espera" style="min-height:150px">NO TOQUES NADA</div>' +
         '<p class="mut small" id="tc9msg" style="text-align:center;min-height:20px;margin-top:10px"></p>';
-      var faltan = 5, t = null;
+      var faltan = 8, t = null, cebo = null, muerto9 = false;
       var box = $("noToques");
       function fallar(){
-        clearInterval(t);
+        clearInterval(t); clearInterval(cebo);
         box.dataset.estado = "fallo";
         box.textContent = "TE DIJE QUE NO TOCARAS";
-        $("tc9msg").textContent = "Otra vez. 5 segundos sin tocar.";
+        $("tc9msg").textContent = "Otra vez. 8 segundos sin tocar.";
         setTimeout(pintar, 1200);
       }
       box.onclick = fallar;
+      // cebos: botones fantasma que aparecen para tentarte
+      cebo = setInterval(function(){
+        if (muerto9) return;
+        var b = document.createElement("button");
+        b.className = "btn pri"; b.type = "button"; b.style.position = "fixed";
+        b.style.left = (10 + Math.random() * 70) + "%"; b.style.top = (20 + Math.random() * 60) + "%";
+        b.style.zIndex = "45"; b.style.maxWidth = "220px";
+        b.textContent = ["¡Regalo! Toca aquí!","Saltar esta pantalla","Ver la contraseña","Gratis: 3,50 €"][rnd(4)];
+        b.onclick = fallar;
+        document.body.appendChild(b);
+        setTimeout(function(){ b.remove(); }, 1400);
+      }, 1800);
       t = setInterval(function(){
         faltan--;
         if (faltan <= 0){
-          clearInterval(t);
+          clearInterval(t); clearInterval(cebo); muerto9 = true;
           box.dataset.estado = "hecho";
-          box.textContent = "¡5 segundos sin tocar!";
+          box.textContent = "¡8 segundos sin tocar!";
           setTimeout(function(){ etapa = 2; pintar(); }, 800);
         }
       }, 1000);
     } else {
       card.innerHTML =
         '<h2>Fase 9 · Pantalla 3/3 · Toca SOLO el verde</h2>' +
-        '<p class="mut small">Se mueve. Tres toques al verde y pasas. Si tocas un rojo, empiezas de nuevo.</p>' +
+        '<p class="mut small">Cinco toques al verde. Se mueve rápido. Si tocas un rojo, empiezas de nuevo.</p>' +
         '<div class="holes" id="verdes"></div>' +
-        '<p class="mut small" id="tc9msg" style="text-align:center;min-height:20px">Verdes: 0/3</p>';
-      var verdes = 0, rojosT = null, mv = null;
+        '<p class="mut small" id="tc9msg" style="text-align:center;min-height:20px">Verdes: 0/5</p>';
+      var verdes = 0, mv = null;
       var grid = $("verdes");
       for (var i = 0; i < 9; i++){
         (function(i){
@@ -1312,9 +1407,9 @@ screens.n9 = function(){
           c.addEventListener("click", function(){
             if (c.dataset.verde === "1"){
               verdes++;
-              $("tc9msg").textContent = "¡Verde! " + verdes + "/3";
-              if (verdes >= 3){
-                clearInterval(mv); clearInterval(rojosT);
+              $("tc9msg").textContent = "¡Verde! " + verdes + "/5";
+              if (verdes >= 5){
+                clearInterval(mv);
                 setTimeout(siguiente, 600);
               }
             } else {
@@ -1331,11 +1426,11 @@ screens.n9 = function(){
         var idx = rnd(9);
         Array.prototype.forEach.call(grid.children, function(x, k){
           if (k === idx){ x.dataset.verde = "1"; x.style.background = "var(--good)"; x.textContent = "✓"; }
-          else { x.dataset.verde = ""; x.style.background = ""; x.textContent = ""; }
+          else { x.dataset.verde = ""; x.style.background = "var(--bad)"; x.textContent = "✕"; }
         });
       }
       colocar();
-      mv = setInterval(colocar, 1400);
+      mv = setInterval(colocar, 750);
     }
   }
   pintar();
@@ -1616,72 +1711,112 @@ screens.n15 = function(){
   });
 };
 
-/* ================= N16: el laberinto ================= */
+/* ================= N16: busca pelotas de padel (buscaminas) ================= */
 screens.n16 = function(){
   setProg(faseTxt(16));
   G.i = 15;
-  var N = 7, px = 0, py = 0, pasos = 0, MAXP = 90;
+  var N = 6, NPEL = 6;
+  var minas = [], revelado = [], marcado = [], muerto = false, empezado = false, modoMarca = false;
+
   app.innerHTML =
     '<div class="card anim-in" id="mz">' +
-      '<h2>Fase 16 · La retirada a tientas</h2>' +
-      '<p class="mut small">Llega a tu casa esquivando controles y bancos de iglesia. Está todo a oscuras: solo ves lo que tienes al lado. ' + MAXP + ' movimientos y te apiadan.</p>' +
-      '<div class="maze" id="maze"></div>' +
-      '<div class="dpad" id="dpad">' +
-        '<span></span><button data-dir="up" type="button">↑</button><span></span>' +
-        '<button data-dir="left" type="button">←</button><button data-dir="down" type="button">↓</button><button data-dir="right" type="button">→</button>' +
+      '<h2>Fase 16 · Busca pelotas de pádel</h2>' +
+      '<p class="mut small">Hay ' + NPEL + ' pelotas escondidas en la pista. Descubre todas las casillas libres. Si la tocas… te la comes. Marca las sospechosas con 🚩.</p>' +
+      '<div class="maze" id="maze" style="grid-template-columns:repeat(6,1fr)"></div>' +
+      '<div class="opts">' +
+        '<button class="btn" id="modoBtn" type="button">🚩 Modo marcar: OFF</button>' +
       '</div>' +
-      '<p class="mut small" id="mzmsg" style="text-align:center;min-height:20px;margin-top:10px">Movimientos: 0</p>' +
+      '<p class="mut small" id="mzmsg" style="text-align:center;min-height:20px">Quedan ' + (N*N - NPEL) + ' casillas libres</p>' +
     '</div>';
-  function pintar(){
-    var obst = ["\u{1F693}", "\u26EA", "\u{1F4D0}"];
-    var html = "";
-    var wi = 0;
-    for (var y = 0; y < N; y++){
-      for (var x = 0; x < N; x++){
-        // niebla: solo se ven las casillas pegadas al borracho (y su propia posicion)
-        var cerca = (Math.abs(x - px) + Math.abs(y - py)) <= 1;
-        var cls = "celda";
-        if (!cerca) cls += " niebla";
-        else if (MAZE[y][x] === 1) cls += " muro";
-        if (x === N-1 && y === N-1) cls += " meta";
-        if (x === px && y === py) cls += " jugador";
-        var contenido = "";
-        if (x === px && y === py) contenido = "\u{1F6B6}";
-        else if (!cerca) contenido = "";
-        else if (x === N-1 && y === N-1) contenido = "\u{1F3E1}";
-        else if (MAZE[y][x] === 1) contenido = obst[wi++ % obst.length];
-        html += '<div class="' + cls + '" data-x="' + x + '" data-y="' + y + '" data-muro="' + (cerca ? MAZE[y][x] : "") + '"' +
-                (x === N-1 && y === N-1 ? ' data-meta="1"' : "") + '>' + contenido + '</div>';
+
+  function gen(iSegura){
+    minas = [];
+    for (var k = 0; k < N*N; k++) minas.push(false);
+    var puestas = 0;
+    while (puestas < NPEL){
+      var i = rnd(N*N);
+      if (i === iSegura || minas[i]) continue;
+      minas[i] = true; puestas++;
+    }
+  }
+  function contar(i){
+    var x = i % N, y = Math.floor(i / N), n = 0;
+    for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++){
+      if (!dx && !dy) continue;
+      var nx = x + dx, ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
+      if (minas[ny*N + nx]) n++;
+    }
+    return n;
+  }
+  function libres(){
+    var n = 0;
+    for (var i = 0; i < N*N; i++) if (!minas[i] && !revelado[i]) n++;
+    return n;
+  }
+  function inundar(i){
+    if (revelado[i] || minas[i] || marcado[i]) return;
+    revelado[i] = true;
+    if (contar(i) === 0){
+      var x = i % N, y = Math.floor(i / N);
+      for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++){
+        if (!dx && !dy) continue;
+        var nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
+        inundar(ny*N + nx);
       }
     }
-    $("maze").innerHTML = html;
   }
-  function mover(dir){
-    var nx = px, ny = py;
-    if (dir === "up") ny--; if (dir === "down") ny++;
-    if (dir === "left") nx--; if (dir === "right") nx++;
-    pasos++;
-    if (nx < 0 || ny < 0 || nx > N-1 || ny > N-1 || MAZE[ny][nx] === 1){
-      var mz = $("mz");
-      mz.classList.remove("shake"); void mz.offsetWidth; mz.classList.add("shake");
-      $("mzmsg").textContent = "¡Pared! Movimientos: " + pasos;
-      if (pasos >= MAXP){ setTimeout(function(){ rendicion("Te has perdido hasta con flechas."); }, 600); }
+  function pintar(){
+    var html = "";
+    for (var i = 0; i < N*N; i++){
+      var cls = "celda mina";
+      var txt = "";
+      if (revelado[i]){
+        cls += " abierta";
+        if (minas[i]){ txt = "\u{1F3BE}"; cls += " pelota"; }
+        else { var c = contar(i); txt = c > 0 ? String(c) : ""; if (c > 0) cls += " n" + c; }
+      } else if (marcado[i]){
+        txt = "\u{1F6A9}";
+      }
+      html += '<button class="' + cls + '" data-i="' + i + '" type="button"' + (revelado[i] || muerto ? ' disabled' : '') + '>' + txt + '</button>';
+    }
+    $("maze").innerHTML = html;
+    var q2 = libres();
+    $("mzmsg").textContent = muerto ? "¡Pelotazo!" : "Quedan " + q2 + " casillas libres";
+  }
+  function tocar(i){
+    if (muerto) return;
+    if (modoMarca){
+      if (revelado[i]) return;
+      marcado[i] = !marcado[i];
+      pintar();
       return;
     }
-    px = nx; py = ny;
-    $("mzmsg").textContent = "Movimientos: " + pasos;
+    if (revelado[i] || marcado[i]) return;
+    if (!empezado){ empezado = true; gen(i); }
+    revelado[i] = true;
+    if (minas[i]){
+      muerto = true;
+      pintar();
+      setTimeout(function(){ rendicion("Te comiste una pelota de pádel. Dolió más que el Bizum de Luis."); }, 700);
+      return;
+    }
+    if (contar(i) === 0) inundar(i);
     pintar();
-    if (px === N-1 && py === N-1){
-      $("mzmsg").textContent = "¡En casa! Y solo en " + pasos + " movimientos.";
+    if (libres() === 0){
       setTimeout(siguiente, 600);
-    } else if (pasos >= MAXP){
-      setTimeout(function(){ rendicion(MAXP + " movimientos para no llegar. Impresionante."); }, 400);
     }
   }
-  $("dpad").addEventListener("click", function(e){
-    var b = e.target.closest("button");
-    if (b) mover(b.dataset.dir);
+  $("maze").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-i]");
+    if (b) tocar(+b.dataset.i);
   });
+  $("modoBtn").onclick = function(){
+    modoMarca = !modoMarca;
+    this.textContent = "🚩 Modo marcar: " + (modoMarca ? "ON" : "OFF");
+    this.className = "btn" + (modoMarca ? " ok" : "");
+  };
   pintar();
 };
 
@@ -1725,6 +1860,7 @@ var toques = 0, timerToques = null;
         toques = 0;
         G.admin = true;
         refrescaAdmin();
+        if (!SITIO_ABIERTO) go("intro");
         toast("Modo administrador activado", 2500);
       }
     } else {
@@ -1740,32 +1876,24 @@ console.log("%cPista 2: toca 7 veces el '5G' de la cabecera.", "color:#888");
 console.log("%cPista 3: en el nivel del teclado escribe 'truco'.", "color:#888");
 console.log("%cNunca gonna give you up.", "color:#e62117");
 
-/* ================= BOSS: examen sorpresa ================= */
+/* ================= BOSS: examen sorpresa (10 fijas) ================= */
 screens.boss = function(){
   setProg(faseTxt(TOTAL_FASES));
-  var bank = PREGUNTAS.boss.slice();
-  var usadas = [];
+  var lista = EXAMEN;
   var rondas = 0, idx = 0, aciertos = 0;
-  var actual = [];
+  app.innerHTML = '<div class="card anim-in" id="bs"></div>';
 
-  function elegir(){
-    var restantes = bank.filter(function(q){ return usadas.indexOf(q.q) < 0; });
-    if (restantes.length < 10) return null;
-    var set = pick(restantes, 10);
-    set.forEach(function(q){ usadas.push(q.q); });
-    return set;
-  }
-  function cardTitulo(){
+  function titulo(){
     $("bs").innerHTML =
       '<h2>' + (rondas === 0 ? "Fase 17 · Examen sorpresa" : "Recuperación " + rondas + "/2") + '</h2>' +
-      '<p class="mut small">10 preguntas. Mínimo un 7.</p>' +
+      '<p class="mut small">Las 10 de siempre. Mínimo un 7.</p>' +
       '<div id="bbody"></div>';
   }
   function mostrar(){
-    if (idx >= actual.length){
+    if (idx >= lista.length){
       var nota = aciertos;
       setTimeout(function(){
-        if (nota >= 7){
+        if (nota >= 7 || G.examenAyuda){
           toast("¡Aprobado con un " + nota + "!", 2200);
           setTimeout(function(){ go("diploma"); }, 700);
         } else {
@@ -1774,48 +1902,83 @@ screens.boss = function(){
           toast("Un " + nota + ". A recuperación (" + rondas + "/2).", 2200);
           setTimeout(function(){
             idx = 0; aciertos = 0;
-            actual = elegir() || [];
-            cardTitulo();
+            titulo();
             mostrar();
           }, 900);
         }
       }, 600);
       return;
     }
-    var q = actual[idx];
-    var ops = pick(q.a, q.a.length);
+    var q = lista[idx];
+    var orden = q.opts.map(function(t, i){ return i; });
+    if (q.tipo !== "auto") orden = pick(orden, orden.length);
     $("bbody").innerHTML =
       '<p><b>' + (idx+1) + '/10.</b> ' + esc(q.q) + '</p>' +
       '<div id="bopts"></div>' +
-      '<p class="mut small" id="bfb" style="margin-top:10px"></p>';
+      '<p class="mut small" id="bfb" style="margin-top:10px;min-height:18px"></p>';
     var box = $("bopts");
-    ops.forEach(function(o){
+    var marca = [];
+    function fin(ok){
+      box.querySelectorAll("button").forEach(function(x){ x.disabled = true; });
+      if (ok) aciertos++;
+      $("bfb").textContent = ok ? "✔ Correcto." : "✘ No era. Si tienes dudas, mentir también cuenta.";
+      setTimeout(function(){ idx++; mostrar(); }, 1900);
+    }
+    orden.forEach(function(i){
       var b = document.createElement("button");
-      b.type = "button"; b.className = "btn"; b.textContent = o.t;
+      b.type = "button"; b.className = "btn"; b.textContent = q.opts[i];
+      if (q.tipo === "multi") b.textContent = ("abcdefghij".charAt(i)).toUpperCase() + ") " + q.opts[i];
       b.onclick = function(){
-        box.querySelectorAll("button").forEach(function(x){ x.disabled = true; });
-        var correcta = o.ok || G.examenAyuda;
-        if (correcta){
-          b.className = "btn ok"; aciertos++;
-          $("bfb").textContent = q.why;
-        } else {
-          b.style.borderColor = "var(--bad)";
-          var buen = q.a.filter(function(x){ return x.ok; })[0];
-          Array.prototype.some.call(box.querySelectorAll("button"), function(x){ if (x.textContent === buen.t){ x.className = "btn ok"; return true; } return false; });
-          $("bfb").textContent = q.why;
+        // "auto": se marque lo que se marque, gana la (a)
+        if (q.tipo === "auto"){
+          Array.prototype.forEach.call(box.children, function(x){ x.disabled = true; });
+          box.children[0].className = "btn ok";
+          fin(true);
+          return;
         }
-        setTimeout(function(){ idx++; mostrar(); }, 2200);
+        if (q.tipo === "multi"){
+          marca[i] = !marca[i];
+          b.className = "btn" + (marca[i] ? " sel" : "");
+          return;
+        }
+        Array.prototype.forEach.call(box.children, function(x){ x.disabled = true; x.className = "btn"; });
+        var ok = (i === q.correcta) || G.examenAyuda;
+        b.className = ok ? "btn ok" : "btn";
+        b.style.borderColor = ok ? "var(--good)" : "var(--bad)";
+        if (!ok){
+          box.children[orden.indexOf(q.correcta)].className = "btn ok";
+        }
+        fin(ok);
       };
       box.appendChild(b);
     });
+    if (q.tipo === "multi"){
+      var comp = document.createElement("button");
+      comp.type = "button"; comp.className = "btn pri"; comp.textContent = "Comprobar";
+      comp.onclick = function(){
+        var sel = Object.keys(marca).filter(function(k){ return marca[k]; }).map(Number);
+        var ok = sel.length === q.correctas.length && q.correctas.every(function(c){ return sel.indexOf(c) >= 0; });
+        if (ok || G.examenAyuda){
+          q.correctas.forEach(function(c){
+            var btn = box.children[orden.indexOf(c)];
+            if (btn) btn.className = "btn ok";
+          });
+          fin(true);
+        } else {
+          Array.prototype.forEach.call(box.children, function(x){ x.disabled = true; });
+          q.correctas.forEach(function(c){
+            var btn = box.children[orden.indexOf(c)];
+            if (btn){ btn.className = "btn ok"; }
+          });
+          fin(false);
+        }
+      };
+      box.appendChild(comp);
+    }
   }
-  app.innerHTML = '<div class="card anim-in" id="bs"></div>';
-  actual = elegir() || [];
-  cardTitulo();
+  titulo();
   mostrar();
 };
-
-/* ================= DIPLOMA ================= */
 screens.diploma = function(){
   setProg("Completado");
   G.finalAbierto = false;
@@ -1896,7 +2059,7 @@ function resetJuego(){
 function guardar(){
   try {
     localStorage.setItem("cumpleWifi.v2", JSON.stringify({
-      nombre: G.nombre, i: G.i, digits: G.digits, sellos: G.sellos,
+      nombre: G.nombre, i: G.i, digits: G.digits, sellos: G.sellos, hechas: G.hechas,
       examenAyuda: G.examenAyuda, admin: G.admin
     }));
   } catch(e){}
@@ -1906,6 +2069,8 @@ function cargar(){
     var s = JSON.parse(localStorage.getItem("cumpleWifi.v2") || "null");
     if (!s || !s.sellos) return false;
     G.nombre = s.nombre || ""; G.i = s.i || 0; G.digits = s.digits; G.sellos = s.sellos;
+    G.hechas = s.hechas || [];
+    for (var k = 0; k < 16; k++) if (G.hechas[k] === undefined) G.hechas[k] = false;
     G.examenAyuda = !!s.examenAyuda; G.admin = !!s.admin;
     return true;
   } catch(e){ return false; }
