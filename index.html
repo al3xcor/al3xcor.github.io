@@ -69,6 +69,7 @@
     cursor:pointer; user-select:none; padding:4px;
   }
   .cell.sel{border-color:var(--acc); background:#3a2f10}
+  .btn.sel{border-color:var(--acc); background:#3a2f10; color:#fff}
   /* celdas con foto */
   .cell.foto{padding:0; overflow:hidden; background:#0b0e13}
   .cell.foto img{width:100%; height:100%; object-fit:cover; display:block}
@@ -245,6 +246,7 @@ var CFG = {
   red:   "CanadaDeLaGitana_5G",
   cumpleaneros: "Luis y Jaime",
   palabraTruco: "truco",
+  claveAdmin: "gitana2026",
   frasesTecleo: ["toyperfectonomeeperesmñana", "sihacefaltaotracopa", "quenohablesfuerte"],
   frasesWhatsapp: [
     { texto:"Más de perfecto si era simplemente por quitar las coño", autor:"Luis" },
@@ -410,15 +412,14 @@ var EXAMEN = [
   { tipo:"auto", q:"¿Eres gay?",
     opts:["Sí","a)","b)","f","no sé","f)","c)","buenas","No"], correcta:0 },
   { tipo:"multi", q:"¿Cuántos tiene Jaime?",
-    opts:["25","26","30","28","29","27","Cuántos qué? ¿Peras? ¿Manzanas?"], correctas:[3,6] },
-  { tipo:"single", q:"Hazte un porro. Un qué? Un porro. Hazte un porro. Hazte un porro. Un qué? Un qué? Un porro. Un porro. Hazte un porro. Hazte un porro. Hazte un porro. Un qué?",
+    opts:["25","26","30","28","29","27","Cuántos qué? ¿Peras? ¿Manzanas?"], correctas:[3,6] },  { tipo:"single", q:"Hazte un porro. Un qué? Un porro. Hazte un porro. Hazte un porro. Un qué? Un qué? Un porro. Un porro. Hazte un porro. Hazte un porro. Hazte un porro. Un qué?",
     opts:["Un porro","Un qué?","Un qué? Un qué? Un porro. Un porro. Un porro","Hazte un porro"], correcta:2 },
   { tipo:"single", q:"Hazte un qué. Un qué? Un qué. Hazte un qué. Hazte un qué. Un qué? Un qué? Un qué. Un qué. Hazte un qué. Hazte un qué. Hazte un qué. Un qué?",
     opts:["Un qué? Un qué? Un qué. Un qué. Un qué","Un porro","Un qué?","Hazte un qué"], correcta:0 },
   { tipo:"single", q:"¿Cuántos tiene Luis?",
     opts:["A mi déjame","29","30","Ron y cerveza"], correcta:1 },
-  { tipo:"single", q:"Problema de los hermanos: uno tiene justo la mitad de años que el otro. Entre los dos suman 48. ¿Cuántos tiene el pequeño?",
-    opts:["24","16","12","El mismo que tenía cuando empezó el problema"], correcta:1 },
+  { tipo:"num", q:"Cuando uno tenía 10 años, el otro tenía la mitad (5). Ahora el mayor tiene 30. ¿Cuántos tiene el otro? Escribe el número.",
+    correcta:25 },
   { tipo:"single", q:"Si por besar esos labios…",
     opts:["fuera capaz de despertar a los muertos, pediría volver a hacerlo aunque me costara la vida entera.",
           "tuviera que renunciar a todo lo que tengo, lo haría sin dudar un solo segundo, porque sé que no hay riqueza mayor.",
@@ -430,10 +431,10 @@ var EXAMEN = [
           "y mañana, y mañana se arrastra con paso mezquino día tras día",
           "es domingo."], correcta:1 },
   { tipo:"single", q:"El tiro de la muerte lo inventó…",
-    opts:["Luis","Roberto Carlos","Juninho Piernasbutano","Javi"], correcta:2 },
+    opts:["Luis","Roberto Carlos","Juninho Piernasbutano","Javi"], correcta:0 },
   { tipo:"single", q:"El padre de Jaime se parece a…",
     opts:["Luis","Bertín","Coronado",
-          "Nadie, es único e irrepetible jo: una mezcla imposible entre la elegancia de un ministro, la mirada penetrante de un lince y la capacidad de contar el mismo chico tres veces en la misma comida como si fuera la primera. Es, sin lugar a dudas, el hombre que hizo grande a Jaime."], correcta:3 }
+          "Nadie, es único e irrepetible jo: una mezcla imposible entre la elegancia de un ministro, la mirada penetrante de un lince y la capacidad de contar el mismo chico tres veces en la misma comida como si fuera la primera. Es, sin lugar a dudas, el hombre que hizo grande a Jaime."], correcta:1 }
 ];
 
 var YT_ID = "dQw4w9WgXcQ"; // rickroll
@@ -461,7 +462,11 @@ var CHOPED = [
   {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Selfie_man_with_cap_and_glasses_in_Paris.jpg/330px-Selfie_man_with_cap_and_glasses_in_Paris.jpg", ok:0},
   {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Front_view_of_a_man_with_a_newly-shaved_head_posted_in_the_Bald_subreddit.jpg/330px-Front_view_of_a_man_with_a_newly-shaved_head_posted_in_the_Bald_subreddit.jpg", ok:0},
   {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Jeff_Bezos%27_iconic_laugh_crop.jpg/330px-Jeff_Bezos%27_iconic_laugh_crop.jpg", ok:0},
-  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Sergio_Ramos_%284980332829%29.jpg/330px-Sergio_Ramos_%284980332829%29.jpg", ok:0}
+  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Sergio_Ramos_%284980332829%29.jpg/330px-Sergio_Ramos_%284980332829%29.jpg", ok:0},
+  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Bruce_Willis_by_Gage_Skidmore_2.jpg/330px-Bruce_Willis_by_Gage_Skidmore_2.jpg", ok:0},
+  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/2015_Law_Enforcement_Explorers_Conference_man_with_crew_cut_speaks_to_explorer.jpg/330px-2015_Law_Enforcement_Explorers_Conference_man_with_crew_cut_speaks_to_explorer.jpg", ok:0},
+  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Michael_Mao_at_Kean_Stages..jpg/330px-Michael_Mao_at_Kean_Stages..jpg", ok:0},
+  {u:"https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Magnetic_Man_Miroslaw_Magola.JPG/330px-Magnetic_Man_Miroslaw_Magola.JPG", ok:0}
 ];
 var PADS_EMO = ["\u{1F943}","\u{1F959}","\u{1F48A}","\u{1F92E}"]; // (referencia historica)
 var PADS_URLS = [
@@ -597,17 +602,21 @@ function siguiente(conSello){
   else go("diploma");
 }
 
-// Salida digna cuando alguien se atasca: nadie se queda sin jugar, pero sin sello
+// Salida digna cuando alguien se atasca: reintentar ahora o dejarlo para luego.
+// En ningún caso se sella la fase.
 function rendicion(motivo){
   setProg(faseTxt(G.i + 1));
   app.className = "anim-in";
   app.innerHTML =
     '<div class="card">' +
-      '<h1>El portal se apiada de ti</h1>' +
+      '<h1>Aquí no hay piedad</h1>' +
       '<p class="mut">' + esc(motivo) + '</p>' +
-      '<p>Pasas a la siguiente fase, pero <b>sin sello</b>: este no te lo has ganado.</p>' +
-      '<button class="btn pri" id="seguir" type="button">Aceptar mi derrota y seguir</button>' +
+      '<p>Puedes <b>reintentarlo</b> cuando quieras — la fase sigue esperándote — o seguir con otras pruebas y volver más tarde. Si pasas de largo, <b>esta fase se queda sin sello</b>.</p>' +
+      '<p class="mut small">Vuelves aquí con el botón 📋 de abajo (menú de fases) o con el botón ← de atrás.</p>' +
+      '<button class="btn pri" id="reintentar" type="button">↻ Reintentar la fase</button>' +
+      '<button class="btn" id="seguir" type="button">Hacerlo más tarde (sin sello)</button>' +
     '</div>';
+  $("reintentar").onclick = function(){ irAFase(G.i); };
   $("seguir").onclick = function(){ siguiente(false); };
 }
 
@@ -765,7 +774,7 @@ screens.intro = function(){
   function start(){
     var v = inp.value.trim().slice(0,24);
     G.nombre = v || "Invitado ilustre";
-    if (v.toLowerCase().replace(/\s+/g,"") === "admin"){
+    if (v.toLowerCase().replace(/\s+/g,"") === "admin" || v === CFG.claveAdmin){
       G.admin = true;
       toast("Modo administrador: botón ⏭ arriba a la derecha para saltar fases.", 4500);
       refrescaAdmin();
@@ -791,8 +800,25 @@ screens.mantenimiento = function(){
         '<p class="mcode">Código: MANTENIMIENTO_01 · Reintenta más tarde</p>' +
       '</div>' +
     '</div>' +
-    '<button class="btn ghost" id="orgBtn" type="button">Soy el organizador</button>';
+    '<div class="card" style="margin-top:12px">' +
+      '<p class="mut small">¿Eres el organizador? Escribe la clave:</p>' +
+      '<input type="text" id="claveIn" maxlength="20" placeholder="Clave" autocomplete="off">' +
+      '<button class="btn" id="claveBtn" type="button">Entrar como organizador</button>' +
+    '</div>' +
+    '<button class="btn ghost" id="orgBtn" type="button">Acceso rápido (7 toques en el 5G)</button>';
   $("orgBtn").onclick = function(){ go("intro"); };
+  $("claveBtn").onclick = function(){
+    var v = ($("claveIn").value || "").trim();
+    if (v === CFG.claveAdmin){
+      G.admin = true;
+      guardar();
+      refrescaAdmin();
+      go("intro");
+    } else {
+      $("claveIn").style.borderColor = "var(--bad)";
+      toast("Esa no es la clave.", 2000);
+    }
+  };
 };
 
 /* ================= N1: identificacion ================= */
@@ -1312,8 +1338,8 @@ screens.n8 = function(){
     h.innerHTML = "";
     h.appendChild(img);
     clearTimeout(h._t);
-    h._t = setTimeout(function(){ ocultar(h); }, Math.max(780, 1150 - score * 45));
-    timer = setTimeout(pop, Math.max(620, 1200 - score * 55));
+    h._t = setTimeout(function(){ ocultar(h); }, Math.max(380, 800 - score * 40));
+    timer = setTimeout(pop, Math.max(400, 850 - score * 50));
   }
   pop();
 };
@@ -1378,11 +1404,11 @@ screens.n9 = function(){
         b.className = "btn pri"; b.type = "button"; b.style.position = "fixed";
         b.style.left = (10 + Math.random() * 70) + "%"; b.style.top = (20 + Math.random() * 60) + "%";
         b.style.zIndex = "45"; b.style.maxWidth = "220px";
-        b.textContent = ["¡Regalo! Toca aquí!","Saltar esta pantalla","Ver la contraseña","Gratis: 3,50 €"][rnd(4)];
+        b.textContent = ["LISTO","Ya puedes tocar","Continuar","¡Ya!","Siguiente","Terminado"][rnd(6)];
         b.onclick = fallar;
         document.body.appendChild(b);
-        setTimeout(function(){ b.remove(); }, 1400);
-      }, 1800);
+        setTimeout(function(){ b.remove(); }, 1200);
+      }, 1000);
       t = setInterval(function(){
         faltan--;
         if (faltan <= 0){
@@ -1430,7 +1456,7 @@ screens.n9 = function(){
         });
       }
       colocar();
-      mv = setInterval(colocar, 750);
+      mv = setInterval(colocar, 450);
     }
   }
   pintar();
@@ -1861,7 +1887,6 @@ var toques = 0, timerToques = null;
         G.admin = true;
         refrescaAdmin();
         if (!SITIO_ABIERTO) go("intro");
-        toast("Modo administrador activado", 2500);
       }
     } else {
       var p = $("adminPanel");
@@ -1910,6 +1935,32 @@ screens.boss = function(){
       return;
     }
     var q = lista[idx];
+    if (q.tipo === "num"){
+      $("bbody").innerHTML =
+        '<p><b>' + (idx+1) + '/10.</b> ' + esc(q.q) + '</p>' +
+        '<input type="text" id="numIn" inputmode="numeric" maxlength="3" placeholder="Escribe el número" autocomplete="off" style="max-width:200px; text-align:center; font-size:24px">' +
+        '<button class="btn pri" id="numOk" type="button">Comprobar</button>' +
+        '<p class="mut small" id="bfb" style="margin-top:10px;min-height:18px"></p>';
+      var pin = $("numIn");
+      setTimeout(function(){ pin.focus(); }, 60);
+      function compNum(){
+        var v = parseInt(pin.value || "", 10);
+        if (v === q.correcta || G.examenAyuda){
+          pin.disabled = true; $("numOk").disabled = true;
+          $("bfb").textContent = "✔ Correcto.";
+          $("bfb").style.color = "var(--good)";
+          setTimeout(function(){ idx++; mostrar(); }, 1200);
+        } else {
+          $("bfb").textContent = "✘ No. Pista: no es " + v + ".";
+          $("bfb").style.color = "var(--bad)";
+          var card = $("bs");
+          card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+        }
+      }
+      $("numOk").onclick = compNum;
+      pin.addEventListener("keydown", function(e){ if (e.key === "Enter") compNum(); });
+      return;
+    }
     var orden = q.opts.map(function(t, i){ return i; });
     if (q.tipo !== "auto") orden = pick(orden, orden.length);
     $("bbody").innerHTML =
