@@ -427,7 +427,7 @@ var EXAMEN = [
     opts:["Un qué? Un qué? Un qué. Un qué. Un qué","Un porro","Un qué?","Hazte un qué"], correcta:0 },
   { tipo:"single", q:"¿Cuántos tiene Luis?",
     opts:["A mi déjame","29","30","Ron y cerveza"], correcta:1 },
-  { tipo:"num", q:"Cuando uno tenía 10 años, el otro tenía la mitad (5). Ahora el mayor tiene 30. ¿Cuántos tiene el otro? Escribe el número.",
+  { tipo:"num", q:"Cuando uno tenía 10 años, el otro tenía la mitad. Ahora el mayor tiene 30. ¿Cuántos tiene el otro?",
     correcta:25 },
   { tipo:"single", q:"Si por besar esos labios…",
     opts:["fuera capaz de despertar a los muertos, pediría volver a hacerlo aunque me costara la vida entera.",
@@ -789,11 +789,32 @@ screens.intro = function(){
   var inp = $("nom"); setTimeout(function(){ inp.focus(); }, 60);
   function start(){
     var v = inp.value.trim().slice(0,24);
-    G.nombre = v || "Invitado ilustre";
-    if (v.toLowerCase().replace(/\s+/g,"") === "admin" || v === CFG.claveAdmin){
-      G.admin = true;
-      refrescaAdmin();
+    if (v.toLowerCase().replace(/\s+/g,"") === "admin"){
+      // el organizador se identifica con nombre + clave
+      app.innerHTML =
+        '<div class="card anim-in">' +
+          '<h1>Acceso de organizador</h1>' +
+          '<p class="mut small">Escribe la clave para entrar.</p>' +
+          '<input type="text" id="claveIn" maxlength="20" placeholder="Clave" autocomplete="off">' +
+          '<button class="btn pri" id="claveBtn" type="button">Entrar</button>' +
+        '</div>';
+      var ci = $("claveIn");
+      setTimeout(function(){ ci.focus(); }, 60);
+      function intentar(){
+        if (ci.value.trim() === CFG.claveAdmin){
+          G.admin = true; G.nombre = "Admin";
+          guardar(); refrescaAdmin();
+          go("n1");
+        } else {
+          ci.style.borderColor = "var(--bad)";
+          toast("Clave incorrecta.", 2000);
+        }
+      }
+      $("claveBtn").onclick = intentar;
+      ci.addEventListener("keydown", function(e){ if (e.key === "Enter") intentar(); });
+      return;
     }
+    G.nombre = v || "Invitado ilustre";
     guardar();
     go("n1");
   }
@@ -815,25 +836,40 @@ screens.mantenimiento = function(){
         '<p class="mcode">Código: MANTENIMIENTO_01 · Reintenta más tarde</p>' +
       '</div>' +
     '</div>' +
-    '<div class="card" style="margin-top:12px">' +
-      '<p class="mut small">¿Eres el organizador? Escribe la clave:</p>' +
-      '<input type="text" id="claveIn" maxlength="20" placeholder="Clave" autocomplete="off">' +
-      '<button class="btn" id="claveBtn" type="button">Entrar como organizador</button>' +
-    '</div>' +
-    '<button class="btn ghost" id="orgBtn" type="button">Acceso rápido (7 toques en el 5G)</button>';
-  $("orgBtn").onclick = function(){ go("intro"); };
+    '<div class="card">' +
+      '<p class="mut small">Eres invitado: escribe tu nombre para que quede registro.</p>' +
+      '<input type="text" id="nom" maxlength="24" placeholder="Tu nombre" autocomplete="off">' +
+      '<button class="btn" id="nomBtn" type="button">Enviar</button>' +
+      '<div id="adminStep" class="oculto" style="margin-top:10px">' +
+        '<input type="text" id="claveIn" maxlength="20" placeholder="Clave de organizador" autocomplete="off">' +
+        '<button class="btn" id="claveBtn" type="button">Entrar como organizador</button>' +
+      '</div>' +
+    '</div>';
+  var inp = $("nom");
+  setTimeout(function(){ inp.focus(); }, 60);
+  function enviar(){
+    var v = inp.value.trim().slice(0,24);
+    if (v.toLowerCase().replace(/\s+/g,"") === "admin"){
+      $("adminStep").classList.remove("oculto");
+      $("claveIn").focus();
+      return;
+    }
+    toast("Anotado. El portal se abrirá el día del evento.", 2600);
+  }
+  $("nomBtn").onclick = enviar;
+  inp.addEventListener("keydown", function(e){ if (e.key === "Enter") enviar(); });
   $("claveBtn").onclick = function(){
     var v = ($("claveIn").value || "").trim();
     if (v === CFG.claveAdmin){
-      G.admin = true;
-      guardar();
-      refrescaAdmin();
+      G.admin = true; G.nombre = "Admin";
+      guardar(); refrescaAdmin();
       go("intro");
     } else {
       $("claveIn").style.borderColor = "var(--bad)";
-      toast("Esa no es la clave.", 2000);
+      toast("Clave incorrecta.", 2000);
     }
   };
+  $("claveIn").addEventListener("keydown", function(e){ if (e.key === "Enter") $("claveBtn").click(); });
 };
 
 /* ================= N1: identificacion ================= */
@@ -1413,17 +1449,35 @@ screens.n9 = function(){
       }
       box.onclick = fallar;
       // cebos: botones fantasma que aparecen para tentarte
+      // cebos realistas: mismos sitios y estilos donde la app pone sus botones
+      var tipos = [
+        { html:'<button class="btn pri" type="button" style="margin:0;width:auto;min-width:200px">Continuar</button>',
+          pos:{ bottom:"86px", left:"50%", transform:"translateX(-50%)" }, vida:3200 },
+        { html:'<button class="btn" type="button" style="margin:0;width:auto;min-width:200px;background:#1f5aa8;border-color:#1f5aa8;color:#fff">Siguiente →</button>',
+          pos:{ bottom:"150px", left:"50%", transform:"translateX(-50%)" }, vida:3000 },
+        { html:'<div style="background:#fff;color:#111;border-radius:10px;padding:10px 14px;max-width:280px;box-shadow:0 2px 10px rgba(0,0,0,.3);font-size:13px;line-height:1.3"><b>🎂 Luis y Jaime</b><br>Te quedan 3 minutos para conectarte.<br><button class="btn pri" type="button" style="margin:6px 0 0;min-height:38px;background:#1f5aa8;border-color:#1f5aa8;color:#fff">Conectar ahora</button></div>',
+          pos:{ top:"64px", left:"50%", transform:"translateX(-50%)" }, vida:3000 },
+        { html:'<div style="background:#fff;color:#111;border-radius:12px;padding:14px;max-width:260px;box-shadow:0 4px 18px rgba(0,0,0,.35);font-size:14px;text-align:center"><b>¿Ya puedes tocar?</b><div style="display:flex;gap:8px;margin-top:10px"><button class="btn pri" type="button" style="margin:0;min-height:40px;background:#1f5aa8;border-color:#1f5aa8;color:#fff">Sí</button><button class="btn" type="button" style="margin:0;min-height:40px">No</button></div></div>',
+          pos:{ top:"45%", left:"50%", transform:"translate(-50%,-50%)" }, vida:2800 },
+        { html:'<button type="button" style="background:none;border:0;color:#1f5aa8;font-size:14px;text-decoration:underline;padding:8px 12px">Saltar esta pantalla</button>',
+          pos:{ bottom:"26px", left:"50%", transform:"translateX(-50%)" }, vida:2600 },
+        { html:'<button type="button" style="width:52px;height:52px;border-radius:50%;border:0;background:#fff;color:#111;font-size:22px;box-shadow:0 3px 12px rgba(0,0,0,.35);cursor:pointer">🔔</button>',
+          pos:{ bottom:"150px", right:"16px" }, vida:3000 }
+      ];
       cebo = setInterval(function(){
         if (muerto9) return;
-        var b = document.createElement("button");
-        b.className = "btn pri"; b.type = "button"; b.style.position = "fixed";
-        b.style.left = (10 + Math.random() * 70) + "%"; b.style.top = (20 + Math.random() * 60) + "%";
-        b.style.zIndex = "45"; b.style.maxWidth = "220px";
-        b.textContent = ["LISTO","Ya puedes tocar","Continuar","¡Ya!","Siguiente","Terminado","Ver la contraseña","Gratis: 3,50 €","¡Regalo! Toca aquí","Saltar esta pantalla"][rnd(10)];
-        b.onclick = fallar;
-        document.body.appendChild(b);
-        setTimeout(function(){ b.remove(); }, 1200);
-      }, 1000);
+        if (document.querySelectorAll(".cebo-real").length >= 2) return;
+        var t = tipos[rnd(tipos.length)];
+        var w = document.createElement("div");
+        w.className = "cebo-real";
+        for (var k in t.pos) w.style[k] = t.pos[k];
+        w.style.position = "fixed";
+        w.style.zIndex = "45";
+        w.innerHTML = t.html;
+        w.addEventListener("click", function(ev){ ev.stopPropagation(); fallar(); });
+        document.body.appendChild(w);
+        setTimeout(function(){ w.remove(); }, t.vida);
+      }, 1500);
       t = setInterval(function(){
         faltan--;
         if (faltan <= 0){
@@ -1861,12 +1915,12 @@ screens.n16 = function(){
   pintar();
 };
 
-// Modo administrador (entrando como "admin" o con 7 toques en el 5G)
+// Modo administrador: nombre "Admin" + clave (única vía de entrada)
 function refrescaAdmin(){
   var b = $("admSaltar");
   if (b) b.style.display = G.admin ? "block" : "none";
   var p = $("adminPanel");
-  if (p) p.classList.toggle("oculto", !G.admin);
+  if (p && !G.admin) p.classList.add("oculto");
   if (typeof pintarWeb === "function") pintarWeb();
 }
 function saltarFase(){
@@ -1908,27 +1962,14 @@ $("admExamen").onclick = function(){
   toast(G.examenAyuda ? "Modo examen ON: ahora aciertas siempre." : "Modo examen OFF.", 3000);
 };
 $("admCerrar").onclick = function(){ $("adminPanel").classList.add("oculto"); };
-var toques = 0, timerToques = null;
+// El panel de admin se abre con un toque en el nombre de la finca (solo admin)
 (function panelAdmin(){
   var brand = document.querySelector(".brand");
   if (!brand) return;
   brand.style.cursor = "pointer";
   brand.addEventListener("click", function(){
-    if (!G.admin){
-      toques++;
-      clearTimeout(timerToques);
-      timerToques = setTimeout(function(){ toques = 0; }, 1200);
-      if (toques === 3) toast("…");
-      if (toques >= 7){
-        toques = 0;
-        G.admin = true;
-        refrescaAdmin();
-        if (!SITIO_ABIERTO) go("intro");
-      }
-    } else {
-      var p = $("adminPanel");
-      p.classList.toggle("oculto");
-    }
+    if (!G.admin) return;
+    $("adminPanel").classList.toggle("oculto");
   });
 })();
 
