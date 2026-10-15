@@ -233,9 +233,9 @@
       <span style="font-size:14px">🌐 Web para el público</span>
       <span id="webEstado" class="small" style="font-weight:700"></span>
     </div>
-    <p class="mut small" style="margin:6px 0 8px">Ahora mismo los invitados ven <i>"mantenimiento"</i> si está cerrada. El interruptor de abajo abre/cierra <b>este móvil</b>; para que afecte a todos, usa el botón del editor.</p>
+    <p class="mut small" style="margin:6px 0 8px">Así ven la web todos los que entren al enlace. También puedes cambiarla desde el móvil con estos enlaces:<br>
+  <b>al3xcor.github.io/gitana2026/abrir</b> y <b>.../cerrar</b></p>
     <button class="btn" id="webToggle" type="button"></button>
-    <button class="btn ghost" id="webEditor" type="button">✏️ Abrir el editor para cambiarlo todos</button>
   </div>
   <button class="btn" id="admSkip" type="button">⏭ Saltar esta fase (con sello)</button>
   <button class="btn" id="admCodigo" type="button">🔢 Ver el código de la fase 13</button>
@@ -448,10 +448,12 @@ var EXAMEN = [
 
 var YT_ID = "dQw4w9WgXcQ"; // rickroll
 
-/* ---- INTERRUPTOR PUBLICO ----
-   false = la web está cerrada para el público (sale "mantenimiento").
-   El organizador ("admin") entra siempre. Para abrirla al público,
-   cambia este false por true (o dime "ábrela" y lo hago en segundos). */
+/* ---- INTERRUPTOR PUBLICO (compartido por todos los moviles) ----
+   El estado vive en un topic anonimo de ntfy.sh. Se cambia desde:
+     https://al3xcor.github.io/gitana2026/abrir
+     https://al3xcor.github.io/gitana2026/cerrar
+   SITIO_ABIERTO es el valor por defecto si ntfy no responde. */
+var NTFY_URL = "https://ntfy.sh/cumple-gitana-al3x-7f3k9m";
 var SITIO_ABIERTO = false;
 var NUM = ["cero","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve","diez","once","doce","trece","catorce","quince","dieciséis","diecisiete","dieciocho","diecinueve","veinte"];
 var EMO_MASTER = ["\u{1F37A}","\u{1F382}","\u{1F973}","\u{1F3B5}","\u{1F355}","\u{1F381}"]; // cerveza pastel fiesta musica pizza regalo
@@ -1929,26 +1931,71 @@ function saltarFase(){
   $("adminPanel").classList.add("oculto");
   siguiente();
 }
-// --- interruptor de la web pública ---
+// --- interruptor compartido de la web (ntfy) ---
+function estadoRemoto(){
+  if (typeof fetch !== "function") return Promise.resolve(null);
+  return fetch(NTFY_URL + "/json?poll=1", { cache: "no-store" })
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      var last = null;
+      txt.split("\n").forEach(function(l){
+        try {
+          var j = JSON.parse(l);
+          if (j.event === "message" && (j.message === "abierto" || j.message === "cerrado")) last = j.message;
+        } catch(e){}
+      });
+      return last;
+    })
+    .catch(function(){ return null; });
+}
+function publicarWeb(abrir){
+  if (typeof fetch !== "function") return Promise.resolve(false);
+  return fetch(NTFY_URL, { method: "POST", body: abrir ? "abierto" : "cerrado" })
+    .then(function(){ return true; })
+    .catch(function(){ return false; });
+}
+function webLocal(){
+  try { var l = localStorage.getItem("webLocal"); if (l !== null) return l === "1"; } catch(e){}
+  return null;
+}
 function webAbierta(){
-  forzado:
-  try { var l = localStorage.getItem("webAbiertaLocal"); if (l !== null) return l === "1"; } catch(e){}
-  return SITIO_ABIERTO;
+  if (G.admin) return true;
+  var l = webLocal();
+  return l === null ? SITIO_ABIERTO : l;
 }
 function pintarWeb(){
   var ab = webAbierta();
-  var e = $("webEstado"); if (e) e.textContent = ab ? "ABIERTA" : "CERRADA";
+  var e = $("webEstado"); if (e) e.textContent = ab ? "ABIERTA (todos)" : "CERRADA (todos)";
   var b = $("webToggle");
-  if (b) { b.textContent = ab ? "🔒 Cerrar la web (este móvil)" : "🔓 Abrir la web (este móvil)"; b.className = "btn" + (ab ? "" : " pri"); }
+  if (b) { b.textContent = ab ? "🔒 Cerrar para todos" : "🔓 Abrir para todos"; b.className = "btn" + (ab ? "" : " pri"); }
+}
+// aplica un estado remoto; solo cambia de pantalla si afecta a este movil
+function aplicarWeb(abierto){
+  var anterior = webAbierta();
+  try { localStorage.setItem("webLocal", abierto ? "1" : "0"); } catch(e){}
+  if (G.admin) { pintarWeb(); return; }
+  if (abierto !== anterior){
+    pintarWeb();
+    go(abierto ? "intro" : "mantenimiento");
+  } else {
+    pintarWeb();
+  }
 }
 $("webToggle").onclick = function(){
-  try { localStorage.setItem("webAbiertaLocal", webAbierta() ? "0" : "1"); } catch(e){}
-  pintarWeb();
-  go(webAbierta() ? "cebo" : "mantenimiento");
-  toast(webAbierta() ? "Web abierta en este móvil." : "Web cerrada en este móvil.", 2500);
-};
-$("webEditor").onclick = function(){
-  window.open("https://github.com/al3xcor/al3xcor.github.io/edit/main/index.html", "_blank");
+  var abrir = !webAbierta();
+  var b = this; b.setAttribute("aria-disabled","true"); b.textContent = "Enviando…";
+  publicarWeb(abrir).then(function(ok2){
+    b.removeAttribute("aria-disabled");
+    if (ok2){
+      try { localStorage.setItem("webLocal", abrir ? "1" : "0"); } catch(e){}
+      pintarWeb();
+      go(abrir ? "intro" : "mantenimiento");
+      toast(abrir ? "Web ABIERTA para todos los moviles." : "Web CERRADA para todos.", 2600);
+    } else {
+      pintarWeb();
+      toast("No se pudo enviar. Comprueba los datos e intentalo otra vez.", 3000);
+    }
+  });
 };
 $("admSaltar").onclick = saltarFase;
 $("admSkip").onclick = saltarFase;
@@ -2219,6 +2266,17 @@ function render(screen){
 
 document.getElementById("reset").onclick = function(){ pedirReset(); };
 refrescaNotas();
+// el estado de la web llega de ntfy (el interruptor del admin)
+var ultimoRemoto = null;
+function sondearRemoto(){
+  estadoRemoto().then(function(v){
+    if (v && v !== ultimoRemoto){ ultimoRemoto = v; aplicarWeb(v === "abierto"); }
+    else { pintarWeb(); }
+  });
+}
+setInterval(sondearRemoto, 20000);
+document.addEventListener("visibilitychange", function(){ if (!document.hidden) sondearRemoto(); });
+sondearRemoto();
 if (cargar()){
   refrescaNotas();
   refrescaAdmin();
