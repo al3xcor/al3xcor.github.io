@@ -203,10 +203,12 @@
   <main id="app" aria-live="polite"></main>
   <footer class="foot">Portal de invitados v2.2 · <button id="reset" type="button">empezar de cero</button></footer>
 </div>
-<button class="notas-btn" id="notasBtn" type="button">📝 <span id="notasN">0</span>/16</button>
-<button class="notas-btn" id="fasesBtn" type="button" style="right:180px">📋 fases</button>
-<button class="notas-btn" id="admSaltar" type="button" style="display:none; right:264px">⏭ saltar</button>
-<button class="notas-btn" id="atrasBtn" type="button" style="right:348px">← atrás</button>
+<div id="floatbar" style="position:fixed; right:12px; bottom:62px; z-index:40; display:flex; flex-direction:column; gap:4px; align-items:flex-end">
+  <button class="notas-btn" id="notasBtn" type="button" style="position:static; right:auto; bottom:auto">📝 <span id="notasN">0</span>/16</button>
+  <button class="notas-btn" id="fasesBtn" type="button" style="position:static; right:auto; bottom:auto">📋 fases</button>
+  <button class="notas-btn" id="atrasBtn" type="button" style="position:static; right:auto; bottom:auto">← atrás</button>
+  <button class="notas-btn" id="admSaltar" type="button" style="display:none; position:static; right:auto; bottom:auto">⏭ saltar</button>
+</div>
 <div class="notas-panel oculto" id="fasesPanel">
   <h2 style="margin-bottom:6px">Las 17 pruebas</h2>
   <p class="mut small" style="margin-bottom:8px">Salta a la que quieras y ve acumulando sellos. ✓ = sellada · = sin sello todavía. Para el examen sorpresa hacen falta 15 pruebas (llevas <b id="fasesHechas">0</b>).</p>
